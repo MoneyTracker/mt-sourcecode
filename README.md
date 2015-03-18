@@ -9,3 +9,15 @@ Key Features:
 ************
 1. Transaction Manager - Capture your daily transactions
 2. Budget Manager - Track your expenses against budget. 
+3. Alerts & Reminders - Manage your reminders here & let it remind you before the due dates so that you don't miss it.
+4. Import Spreadsheets - We have made it easy for you to import the spreadsheets just like that. All it requires is one time set up. 
+5. Accounts Manager - Manage all your bank and trading accounts together in a single space here.
+6. Category Manager - Create and manage your own categories and group them as you see fit.
+7. Reports - Generate customized reports here to understand the transactions in your accounts.
+
+Demo:
+****
+Take a look at the demo <a href="http://localhost:8080/mt-app">here</a> & learn more about it.
+
+Your feedback is valuable to us, please take a while & help us improve the user experience. 
+Send us your feedback at moneytracker.forum@gmail.com with the subject line 'Feedback';
