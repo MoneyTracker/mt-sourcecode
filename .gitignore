@@ -1,0 +1,12 @@
+.project
+.classpath
+.settings/
+target/
+.class
+bin/
+.idea/
+.metadata/
+node_modules/
+bower_components/
+dist/
+.tmp/
