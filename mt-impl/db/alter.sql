@@ -1,61 +1,65 @@
-ALTER TABLE ACCOUNT 
-ADD CONSTRAINT unq_account_name UNIQUE (NAME);
+-- add user_id 
+alter table account add user_id int(20) NOT NULL;
+update account set user_id = (select id from mt_user where name = 'Demo');
+alter table account 
+add constraint fk_account_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE CATEGORY 
-ADD CONSTRAINT unq_category_name UNIQUE (NAME,PRNT_CAT_ID,TRAN_TYPE),
-ADD CONSTRAINT fk_category_prnt_id FOREIGN KEY (PRNT_CAT_ID) REFERENCES CATEGORY (ID ) ON DELETE CASCADE,
-ADD CONSTRAINT fk_category_acct_id FOREIGN KEY (DFLT_ACCT_ID) REFERENCES ACCOUNT (ID ) ON DELETE SET NULL;
+alter table bnk_stmnt add user_id int(20) NOT NULL;
+update bnk_stmnt set user_id = (select id from mt_user where name = 'Demo');
+alter table bnk_stmnt 
+add constraint fk_bnk_stmnt_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+-- 
+alter table bnk_stmnt_col_map add user_id int(20) NOT NULL;
+update bnk_stmnt_col_map set user_id = (select id from mt_user where name = 'Demo');
+alter table bnk_stmnt_col_map 
+add constraint fk_bnk_stmnt_col_map_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE TRANSACTION
-ADD CONSTRAINT fk_transaction_cat_id FOREIGN KEY (CAT_ID) REFERENCES CATEGORY (ID ),
-ADD CONSTRAINT fk_transaction_acct_id FOREIGN KEY (ACCT_ID) REFERENCES ACCOUNT (ID );
+alter table bnk_stmnt_data_field add user_id int(20) NOT NULL;
+update bnk_stmnt_data_field set user_id = (select id from mt_user where name = 'Demo');
+alter table bnk_stmnt_data_field 
+add constraint fk_bnk_stmnt_data_field_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE TRANSACTION
-ADD IS_REC			tinyint(1) DEFAULT 0;
-ALTER TABLE TRANSACTION
-ADD REC_WHEN		varchar(25);
+alter table bnk_stmnt_data_map add user_id int(20) NOT NULL;
+update bnk_stmnt_data_map set user_id = (select id from mt_user where name = 'Demo');
+alter table bnk_stmnt_data_map 
+add constraint fk_bnk_stmnt_data_map_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BUDGET 
-ADD CONSTRAINT unq_budget_name UNIQUE (NAME);
+alter table budget add user_id int(20) NOT NULL;
+update budget set user_id = (select id from mt_user where name = 'Demo');
+alter table budget 
+add constraint fk_budget_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BUDGET_ITEM 
-ADD CONSTRAINT unq_budget_cat UNIQUE (BUDGET_ID, CAT_ID),
-ADD CONSTRAINT fk_category_id FOREIGN KEY (CAT_ID) REFERENCES CATEGORY (ID ) ON DELETE CASCADE,
-ADD CONSTRAINT fk_budget_id FOREIGN KEY (BUDGET_ID) REFERENCES BUDGET (ID ) ON DELETE CASCADE;
+alter table budget_item add user_id int(20) NOT NULL;
+update budget_item set user_id = (select id from mt_user where name = 'Demo');
+alter table budget_item 
+add constraint fk_budget_item_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BNK_STMNT 
-ADD CONSTRAINT bnk_st_unq_name UNIQUE (NAME),
-ADD CONSTRAINT fk_acct_id FOREIGN KEY (ACCT_ID) REFERENCES ACCOUNT (ID ) ON DELETE CASCADE;
+alter table category add user_id int(20) NOT NULL;
+update category set user_id = (select id from mt_user where name = 'Demo');
+alter table category 
+add constraint fk_category_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BNK_STMNT_COL_MAP 
-ADD CONSTRAINT fk_bnk_st_id FOREIGN KEY (BNK_STMNT_ID) REFERENCES BNK_STMNT (ID ) ON DELETE CASCADE;
+alter table budget add user_id int(20) NOT NULL;
+update budget set user_id = (select id from mt_user where name = 'Demo');
+alter table budget 
+add constraint fk_budget_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BNK_STMNT_DATA_MAP 
-ADD CONSTRAINT fk_data_bnk_st_id FOREIGN KEY (BNK_STMNT_ID) REFERENCES BNK_STMNT (ID ) ON DELETE CASCADE;
+alter table future_transaction add user_id int(20) NOT NULL;
+update future_transaction set user_id = (select id from mt_user where name = 'Demo');
+alter table future_transaction 
+add constraint fk_future_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE BNK_STMNT_DATA_FIELD 
-ADD CONSTRAINT bnk_st_data_field_unq_prop UNIQUE (DATA_MAP_ID, PROP_NAME),
-ADD CONSTRAINT fk_data_field_data_map_id FOREIGN KEY (DATA_MAP_ID) REFERENCES BNK_STMNT_DATA_MAP (ID ) ON DELETE CASCADE;
+alter table imported_transaction add user_id int(20) NOT NULL;
+update imported_transaction set user_id = (select id from mt_user where name = 'Demo');
+alter table imported_transaction 
+add constraint fk_imported_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE TRANSACTION ADD CHECKSUM VARCHAR(100);
+alter table setting add user_id int(20) NOT NULL;
+update setting set user_id = (select id from mt_user where name = 'Demo');
+alter table setting 
+add constraint fk_setting_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
 
-ALTER TABLE TRANSACTION ADD FROM_ACCT_ID INT(20);
-
-ALTER TABLE TRANSACTION
-ADD CONSTRAINT fk_transaction_from_acct_id FOREIGN KEY (FROM_ACCT_ID) REFERENCES ACCOUNT (ID );
-
-ALTER TABLE FUTURE_TRANSACTION
-ADD CONSTRAINT fk_futuretransaction_tran_id FOREIGN KEY (TRAN_ID) REFERENCES TRANSACTION(ID);
-
-ALTER TABLE MT_USER 
-ADD CONSTRAINT unq_user_username UNIQUE (USERNAME);
-
-ALTER TABLE MT_USER_ROLE 
-ADD CONSTRAINT unq_userrole_role_user UNIQUE (USER_ID, ROLE_ID),
-ADD CONSTRAINT fk_userrole_user_id FOREIGN KEY (USER_ID) REFERENCES MT_USER (ID );
-
-ALTER TABLE IMPORTED_TRANSACTION 
-ADD CONSTRAINT fk_imptran_tran_id FOREIGN KEY (TRAN_ID) REFERENCES TRANSACTION (ID ) ON DELETE CASCADE;
-
-ALTER TABLE IMPORTED_TRANSACTION 
-ADD CONSTRAINT unq_imptran_checksum UNIQUE (CHECKSUM);
+alter table transaction add user_id int(20) NOT NULL;
+update transaction set user_id = (select id from mt_user where name = 'Demo');
+alter table transaction 
+add constraint fk_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );

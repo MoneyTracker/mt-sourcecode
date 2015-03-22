@@ -1,5 +1,7 @@
 package com.maqs.moneytracker.common;
 
+import com.maqs.moneytracker.common.paging.Page;
+
 /**
  * The place to hold the constants.
  * @author maq
@@ -46,4 +48,6 @@ public final class Constansts {
 	 * End of Constants
 	 */
 
+	public static final Page DEFAULT_PAGE = new Page(1, 100);
+	
 }

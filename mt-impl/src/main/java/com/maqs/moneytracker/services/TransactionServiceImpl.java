@@ -38,6 +38,7 @@ import com.maqs.moneytracker.model.Account;
 import com.maqs.moneytracker.model.Category;
 import com.maqs.moneytracker.model.FutureTransaction;
 import com.maqs.moneytracker.model.Transaction;
+import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
 import com.maqs.moneytracker.types.MessageType;
@@ -76,6 +77,9 @@ public class TransactionServiceImpl implements TransactionService {
 	public static final String MSG_DUPLICATE_TRANSACTION = "Duplicate";
 
 	@Autowired
+	private LoggedInChecker loggedInChecker;
+	
+	@Autowired
 	private DomainService domainService;
 
 	public TransactionServiceImpl() {
@@ -101,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public List<Transaction> listByType(TransactionType transactionType,
 			Page page) throws ServiceException {
 		List<Transaction> transactions = null;
-		QuerySpec querySpec = new QuerySpec(Transaction.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Transaction.class);
 		querySpec.addPropertySpec(new PropertySpec(Category.TRAN_TYPE,
 				Operation.EQ, transactionType));
 		try {
@@ -128,7 +132,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public List<Transaction> listByCategory(Category category, Page page)
 			throws ServiceException {
 		List<Transaction> transactions = null;
-		QuerySpec querySpec = new QuerySpec(Transaction.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Transaction.class);
 		querySpec.addPropertySpec(new PropertySpec(Transaction.CAT_ID,
 				Operation.EQ, category.getId()));
 		try {
@@ -192,6 +196,10 @@ public class TransactionServiceImpl implements TransactionService {
 			if (Action.UPDATE == actionIndex) {
 				current.setLastModifiedOn(new Date(System.currentTimeMillis()));
 			}
+		}
+		if (Action.CREATE_NEW == actionIndex) {
+			Long userId = loggedInChecker.getCurrentUserId();
+			current.setUserId(userId);
 		}
 		if (Action.CREATE_NEW == actionIndex || Action.UPDATE == actionIndex) {
 			String checksum = getChecksum(current);
@@ -317,9 +325,9 @@ public class TransactionServiceImpl implements TransactionService {
 		boolean duplicate = false;
 		String checksum = current.getChecksum();
 		try {
-			QuerySpec q = new QuerySpec(Transaction.class.getName());
-			q.addPropertySpec(new PropertySpec(Transaction.CHECKSUM, checksum));
-			Long count = dao.count(q);
+			QuerySpec querySpec = loggedInChecker.getQuerySpec(Transaction.class);
+			querySpec.addPropertySpec(new PropertySpec(Transaction.CHECKSUM, checksum));
+			Long count = dao.count(querySpec);
 			int action = current.getAction().getActionIndex();
 			duplicate = Action.CREATE_NEW == action ? count > 0 : count > 1;
 			if (duplicate) {
@@ -404,7 +412,8 @@ public class TransactionServiceImpl implements TransactionService {
 		List<TransactionDto> transactions = null;
 		try {
 			Date[] dates = DateUtil.getHistoricalReportRange();
-			Object[] params = { dates[0], dates[1] };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { dates[0], dates[1], userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					GET_MONTHLY_INC_EXP_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -441,8 +450,8 @@ public class TransactionServiceImpl implements TransactionService {
 				throw new ServiceException("Category is not selected.");
 			}
 			Date[] dates = DateUtil.getHistoricalReportRange();
-			Object[] params = { tranType, catId, dates[0], dates[1] }; // E -
-																		// Expense
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { tranType, catId, dates[0], dates[1], userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					GET_MONTHLY_HISTORY_REPORT_BY_CAT, params,
 					TransactionDto.class);
@@ -472,8 +481,8 @@ public class TransactionServiceImpl implements TransactionService {
 			if (tranType == null) {
 				throw new IllegalArgumentException("tranType is null");
 			}
-
-			Object[] params = { tranType };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { tranType, userId };
 			List<Category> categories = dao.executeNamedSQLQuery(GET_MAX_CAT,
 					params, Category.class);
 			if (CollectionsUtil.isNonEmpty(categories)) {
@@ -493,7 +502,8 @@ public class TransactionServiceImpl implements TransactionService {
 			throws ServiceException {
 		Transaction transaction = null;
 		try {
-			Object[] params = { category.getId() };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { category.getId(), userId };
 			List<Transaction> transactions = dao.executeNamedSQLQuery(
 					GET_LAST_TRAN_BY_CAT, params, Transaction.class);
 			if (CollectionsUtil.isNonEmpty(transactions)) {
@@ -515,10 +525,8 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			String tranType = TransactionType.EXPENSE;
 			Date[] range = DateUtil.getRange(reportBy);
-
-			Object[] params = { tranType, range[0], range[1], numOfRecords }; // E
-																				// -
-																				// Expense
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { tranType, range[0], range[1], userId, numOfRecords }; 
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					LIST_TOP_CATEGORIES, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -537,10 +545,8 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			String tranType = TransactionType.INCOME;
 			Date[] range = DateUtil.getRange(reportBy);
-
-			Object[] params = { tranType, range[0], range[1], numOfRecords }; // E
-																				// -
-																				// Expense
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { tranType, range[0], range[1], userId, numOfRecords };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					LIST_TOP_CATEGORIES, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -576,8 +582,9 @@ public class TransactionServiceImpl implements TransactionService {
 		BigDecimal total = null;
 		try {
 			Date[] range = getRange(searchDto);
+			Long userId = loggedInChecker.getCurrentUserId();
 			Object[] params = { searchDto.getTranType(),
-					range[0], range[1] };
+					range[0], range[1], userId };
 			List result = dao.executeNamedSQLQuery(GET_TOTAL_AMOUNT, params);
 			if (CollectionsUtil.isNonEmpty(result)) {
 				total = (BigDecimal) result.get(0);
@@ -597,8 +604,8 @@ public class TransactionServiceImpl implements TransactionService {
 		List<AccountDto> accountDtos = null;
 		try {
 			Date[] range = DateUtil.getRange(reportBy);
-
-			Object[] params = { range[0], range[1] }; // E - Expense
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { range[0], range[1], userId }; // E - Expense
 			accountDtos = (List<AccountDto>) dao.executeNamedSQLQuery(
 					GET_IN_OUT_OF_INCOME_N_EXPENCES, params, AccountDto.class);
 		} catch (DataAccessException e) {
@@ -618,7 +625,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.warn("page is not available, using the default page...");
 			page = new Page(0, 50);
 		}
-		QuerySpec querySpec = new QuerySpec(Transaction.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Transaction.class);
 		Date[] range = getRange(dto);
 		if (range != null) {
 			querySpec.addPropertySpec(new PropertySpec(
@@ -732,7 +739,8 @@ public class TransactionServiceImpl implements TransactionService {
 			return transactions;
 		}
 		try {
-			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.EXPENSE };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.EXPENSE, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					TRAN_TYPE_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -750,7 +758,8 @@ public class TransactionServiceImpl implements TransactionService {
 			throws ServiceException {
 		List<TransactionDto> transactions = null;
 		try {
-			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.INCOME };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.INCOME, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					TRAN_TYPE_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -773,7 +782,8 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		
 		try {
-			Object[] params = { from, to, TransactionType.EXPENSE };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { from, to, TransactionType.EXPENSE, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					SUM_BY_CATEGORIES_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -791,7 +801,8 @@ public class TransactionServiceImpl implements TransactionService {
 				throw new IllegalArgumentException("fromDate is required.");
 			}
  			Date[] range = getRange(searchDto);
-			Object[] params = { range[0], range[1] };
+ 			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { range[0], range[1], userId };
 			List<TransactionDto> transactions = (List<TransactionDto>) dao
 					.executeNamedSQLQuery(INCOME_EXPENSE_TOTAL, params,
 							TransactionDto.class);
@@ -867,7 +878,7 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 
 			if (CollectionsUtil.isNonEmpty(ids)) {
-				Map<Long, Entity> map = fetchCategoryMap(ids);
+				Map<Long, Entity> map = domainService.fetchCategoryMap(ids);
 				for (Transaction t : transactions) {
 					Long catId = t.getCategoryId();
 					if (catId != null) {
@@ -878,15 +889,6 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		}
 		return categories;
-	}
-
-	private Map<Long, Entity> fetchCategoryMap(Set<Long> ids) throws ServiceException {
-		DomainSearchDto dto = new DomainSearchDto();
-		dto.setCategoryIds(new ArrayList<Long>(ids));
-		List<Category> categories = domainService.listCategories(dto);
-		Map<Long, Entity> map = com.maqs.moneytracker.common.util.Util
-				.getMap(categories);
-		return map;
 	}
 
 	public List<Account> fetchAccounts(List<Transaction> transactions)
@@ -936,7 +938,7 @@ public class TransactionServiceImpl implements TransactionService {
 			Long catId = transactionDto.getCatId();
 			ids.add(catId);
 		}
-		Map<Long, Entity> map = fetchCategoryMap(ids);
+		Map<Long, Entity> map = domainService.fetchCategoryMap(ids);
 		
 		Set<Long> parentCatIds = new HashSet<Long>();
 		for (Long catId : map.keySet()) {
@@ -947,7 +949,7 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		}
 		if (CollectionsUtil.isNonEmpty(parentCatIds)) {
-			Map<Long, Entity> parentCatMap = fetchCategoryMap(parentCatIds);
+			Map<Long, Entity> parentCatMap = domainService.fetchCategoryMap(parentCatIds);
 			if (parentCatMap != null) {
 				map.putAll(parentCatMap);
 			}
@@ -1019,9 +1021,9 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		
 		List<TransactionDto> transactions = null;
-		try {
-			
-			Object[] params = { dates[0], dates[1] };
+		try {			
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { dates[0], dates[1], userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					GET_MONTHLY_INC_EXP_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -1035,4 +1037,5 @@ public class TransactionServiceImpl implements TransactionService {
 			Page page) throws ServiceException {
 		return null;
 	}
+	
 }

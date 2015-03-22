@@ -42,7 +42,6 @@ public class CustomAuthenticationToken implements Authentication {
     	if (tokenManager.valid(token)) {
     		MyUserDetails userDetails = (MyUserDetails) tokenManager
     				.getUserFromToken(token);
-    		System.out.println();
     		details = userDetails;
     		principal = userDetails;
     		username = userDetails.getUsername();

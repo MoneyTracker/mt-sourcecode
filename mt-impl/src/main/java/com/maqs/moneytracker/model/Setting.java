@@ -16,7 +16,7 @@ public class Setting extends BaseEntity {
 	private String value;
 	
 	private String type;
-	
+		
 	public Setting() {
 		
 	}
@@ -52,6 +52,5 @@ public class Setting extends BaseEntity {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
 	
 }

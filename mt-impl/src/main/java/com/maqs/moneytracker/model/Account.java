@@ -31,7 +31,7 @@ public class Account extends BaseEntity {
 	private boolean displayable = true;
 	
 	private String displayName;
-	
+		
 	public Account() {
 		
 	}
@@ -62,9 +62,7 @@ public class Account extends BaseEntity {
 	}
 
 	public void setAccountType(AccountType accountType) {
-		this.accountType = accountType;
-		setAccountTypeCode(accountType.getCode());
-		updateDisplayName();
+		this.accountType = accountType;		
 	}
 	
 	public boolean isDisplayable() {
@@ -89,6 +87,8 @@ public class Account extends BaseEntity {
 	
 	public void setAccountTypeCode(String accountTypeCode) {
 		this.accountTypeCode = accountTypeCode;
+		setAccountType(AccountType.valueOf(accountTypeCode));
+		updateDisplayName();
 	}
 	
 	private void updateDisplayName() {
@@ -101,7 +101,7 @@ public class Account extends BaseEntity {
 		} 
 		setDisplayName(displayText);
 	}
-	
+
 	@Override
 	public String toString() {
 		return getName();

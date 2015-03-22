@@ -1,5 +1,7 @@
 package com.maqs.moneytracker.common;
 
+import com.maqs.moneytracker.common.paging.spec.PropertySpec;
+
 /**
  * The place to hold the constants.
  * @author maq
@@ -77,4 +79,6 @@ public final class Constansts {
 	public static final double VIEWPORT_HEIGHT = 999;
 
 	public static final String HYPHEN = "-";
+
+	public static final String USER_ID = "userId";
 }

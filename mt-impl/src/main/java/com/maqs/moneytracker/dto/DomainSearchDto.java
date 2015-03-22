@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.maqs.moneytracker.common.paging.Page;
+import com.maqs.moneytracker.common.paging.spec.OrderBySpec;
 
 @JsonInclude(Include.NON_NULL)
 public class DomainSearchDto {
@@ -20,26 +21,38 @@ public class DomainSearchDto {
 
 	public static final String CAT_ID = "categoryId";
 
-	private String type;
+	private String transactionType;
 
+	private String accountType;
+	
 	private List<Long> categoryIds;
 
 	private List<Long> accountIds;
 	
 	private Page page;
 
+	private List<OrderBySpec> orderByList;
+	
 	public DomainSearchDto() {
 
 	}
 
-	public String getType() {
-		return type;
+	public String getTransactionType() {
+		return transactionType;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setTransactionType(String type) {
+		this.transactionType = type;
 	}
 
+	public String getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(String type) {
+		this.accountType = type;
+	}
+	
 	public List<Long> getCategoryIds() {
 		return categoryIds;
 	}
@@ -71,6 +84,13 @@ public class DomainSearchDto {
 		this.page = page;
 	}
 
+	public List<OrderBySpec> getOrderByList() {
+		return orderByList;
+	}
+
+	public void setOrderByList(List<OrderBySpec> orderByList) {
+		this.orderByList = orderByList;
+	}
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

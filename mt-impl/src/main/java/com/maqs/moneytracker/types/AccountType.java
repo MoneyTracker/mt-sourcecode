@@ -12,7 +12,7 @@ public class AccountType {
 	
 	public static final String CREDIT_CARD = "CC";
 	
-	public static final String INVESTMENT = "I";
+	public static final String SODEXO = "S";
 	
 	public static final String DEBT = "D";
 
@@ -56,14 +56,14 @@ public class AccountType {
 		AccountType bankType = new AccountType(BANK, "Bank");
 		types.put(BANK, bankType); 
 		
+		AccountType sodexoType = new AccountType(SODEXO, "Sodexo");
+		types.put(SODEXO, sodexoType); 
+		
 		AccountType ccType = new AccountType(CREDIT_CARD, "Credit Card");
 		types.put(CREDIT_CARD, ccType); 
-		
-		AccountType invType = new AccountType(INVESTMENT, "Investment");
-		types.put(INVESTMENT, invType); 
-		
+		/*
 		AccountType debtType = new AccountType(DEBT, "Debt");
-		types.put(DEBT, debtType); 
+		types.put(DEBT, debtType); */
 	}
 	
 	public static Collection<AccountType> values() {

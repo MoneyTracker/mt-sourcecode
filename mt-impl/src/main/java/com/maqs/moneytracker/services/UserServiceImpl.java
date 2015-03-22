@@ -1,6 +1,5 @@
 package com.maqs.moneytracker.services;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -98,12 +97,13 @@ public class UserServiceImpl implements UserService {
 			String encPassword = cipherGenerator.encryptToBase64(password);
 			querySpec.addPropertySpec(new PropertySpec(User.PASSWORD, encPassword));
 			
-			Long count = (Long) dao.count(querySpec);
-			if (count > 0) {
+			User existingUser = (User) dao.getEntity(querySpec);
+			if (existingUser != null) {
 				List<Role> roles = getRoles(user.getUsername());
-				UserDetails userDetails = new MyUserDetails(user, roles);
+				UserDetails userDetails = new MyUserDetails(existingUser, roles);
 				userDto = new UserDto();
-				userDto.setName(username);						
+				String name = existingUser.getName();
+				userDto.setName(name);						
 				String token = tokenManager.newToken(userDetails);
 				userDto.setToken(token);
 			} else {

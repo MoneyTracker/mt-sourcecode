@@ -18,6 +18,7 @@ import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
+import com.maqs.moneytracker.common.transferobjects.Action;
 import com.maqs.moneytracker.common.transferobjects.Entity;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.Util;
@@ -29,6 +30,7 @@ import com.maqs.moneytracker.dto.TransactionSearchDto;
 import com.maqs.moneytracker.model.Budget;
 import com.maqs.moneytracker.model.BudgetItem;
 import com.maqs.moneytracker.model.Category;
+import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
 
@@ -48,6 +50,9 @@ public class BudgetServiceImpl implements BudgetService {
 
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private LoggedInChecker loggedInChecker;
 	
 	public BudgetServiceImpl() {
 
@@ -78,6 +83,13 @@ public class BudgetServiceImpl implements BudgetService {
 	private List<BudgetItem> store0(List<BudgetItem> budgetItems)
 			throws ServiceException {
 		try {
+			Long userId = loggedInChecker.getCurrentUserId();
+			for (BudgetItem budgetItem : budgetItems) {
+				int actionIndex = budgetItem.getAction().getActionIndex();
+				if (Action.CREATE_NEW == actionIndex) {
+					budgetItem.setUserId(userId);
+				}
+			}
 			dao.saveAll(budgetItems);
 		} catch (DataAccessException e) {
 			throw new ServiceException(e);
@@ -94,7 +106,7 @@ public class BudgetServiceImpl implements BudgetService {
 			throw new IllegalArgumentException("given name is null");
 		}
 		Budget budget = null;
-		QuerySpec querySpec = new QuerySpec(Budget.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Budget.class);
 		querySpec.addPropertySpec(new PropertySpec(Budget.NAME, Operation.EQ,
 				name));
 		try {
@@ -114,6 +126,11 @@ public class BudgetServiceImpl implements BudgetService {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
 	public Budget store(Budget budget) throws ServiceException {
 		try {
+			Long userId = loggedInChecker.getCurrentUserId();
+			int actionIndex = budget.getAction().getActionIndex();
+			if (Action.CREATE_NEW == actionIndex) {
+				budget.setUserId(userId);
+			}
 			budget = (Budget) dao.saveOrUpdate(budget);
 
 			if (CollectionsUtil.isNonEmpty(budget.getItems())) {
@@ -141,7 +158,7 @@ public class BudgetServiceImpl implements BudgetService {
 		}
 
 		List<BudgetItem> items = null;
-		QuerySpec querySpec = new QuerySpec(BudgetItem.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(BudgetItem.class);
 		querySpec.addPropertySpec(new PropertySpec(BudgetItem.BUDGET_ID,
 				budgetId));
 		try {
@@ -187,15 +204,12 @@ public class BudgetServiceImpl implements BudgetService {
 			Map<Long, TransactionDto> map = transactionService.getTransactionsByCategoryMap(tranListByCategories);
 			Set<Long> ids = map.keySet();
 			
-			QuerySpec querySpec = new QuerySpec(BudgetItem.class.getName());
+			QuerySpec querySpec = loggedInChecker.getQuerySpec(BudgetItem.class);
 			querySpec.addPropertySpec(new PropertySpec(BudgetItem.BUDGET_ID,
 					budgetId));
 			querySpec.addPropertySpec(new PropertySpec(BudgetItem.CAT_ID, Operation.IN, ids));
 			budgetItems = (List<BudgetItem>) dao.listAll(querySpec,
 					searchDto.getPage());
-			/*if (! CollectionsUtil.isNotNullOrEmpty(tranListByCategories)) {
-				throw new ServiceException("No budget items found.");
-			}*/
 			List<Category> categories = fetchCategories(ids);
 			
 			putSpentAmount(budgetItems, tranListByCategories);
@@ -271,15 +285,11 @@ public class BudgetServiceImpl implements BudgetService {
 				}
 			}
 			if (CollectionsUtil.isNonEmpty(parentCategoryIds)) {
-				QuerySpec spec = new QuerySpec(Category.class.getName());
-				spec.addPropertySpec(new PropertySpec(Category.ID, Operation.IN, parentCategoryIds));
-				try {
-					List<Category> parentCategories = (List<Category>) dao.listAll(spec);
-					if (CollectionsUtil.isNonEmpty(parentCategories)) {
-						categories.addAll(parentCategories);
-					}
-				} catch (DataAccessException e) {
-					throw new ServiceException(e);
+				DomainSearchDto dto = new DomainSearchDto();
+				dto.setCategoryIds(new ArrayList<Long>(parentCategoryIds));
+				List<Category> parentCategories = domainService.listCategories(dto);
+				if (CollectionsUtil.isNonEmpty(parentCategories)) {
+					categories.addAll(parentCategories);
 				}
 			}
 			
@@ -392,7 +402,7 @@ public class BudgetServiceImpl implements BudgetService {
 	@Transactional(readOnly = true)
 	public List<Budget> listBudget() throws ServiceException {
 		List<Budget> items = null;
-		QuerySpec querySpec = new QuerySpec(Budget.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Budget.class);
 		try {
 			items = (List<Budget>) dao.listAll(querySpec, null);
 		} catch (DataAccessException e) {
@@ -410,12 +420,13 @@ public class BudgetServiceImpl implements BudgetService {
 		checkSearchCriteria(searchDto);
 
 		BigDecimal totalBudgeted = null;
-		QuerySpec querySpec = new QuerySpec(BudgetItem.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(BudgetItem.class);
 		Long budgetId = searchDto.getBudgetId();
 		querySpec.addPropertySpec(new PropertySpec(BudgetItem.BUDGET_ID,
 				budgetId));
 		try {
-			Object[] params = { budgetId };
+			Long userId = loggedInChecker.getCurrentUserId();
+			Object[] params = { budgetId, userId };
 			List result = dao.executeNamedSQLQuery(GET_TOTAL_BUDGETED, params);
 			if (CollectionsUtil.isNonEmpty(result)) {
 				totalBudgeted = (BigDecimal) result.get(0);

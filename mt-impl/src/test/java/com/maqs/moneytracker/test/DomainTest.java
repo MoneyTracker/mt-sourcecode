@@ -25,7 +25,7 @@ public class DomainTest extends BaseTestCase {
 	public void testStoreCategorys() throws ServiceException {
 		Category c1 = new Category("Salary");
 		c1.setTransactionType(TransactionType.valueOf(TransactionType.INCOME));
-		List<Category> list = domainService.store(Arrays.asList(c1));
+		List<Category> list = domainService.storeCategories(Arrays.asList(c1));
 		Assert.assertTrue(list.size() > 0);
 	}
 	

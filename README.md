@@ -17,7 +17,7 @@ Key Features:
 
 Demo:
 ****
-Take a look at the demo <a href="http://localhost:8080/mt-app">here</a> & learn more about it.
+Take a look at the demo <a href="http://community-mtforum.rhcloud.com/mt-app/">here</a> & learn more about it.
 
 Your feedback is valuable to us, please take a while & help us improve the user experience. 
 Send us your feedback at moneytracker.forum@gmail.com with the subject line 'Feedback';

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +19,7 @@ import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
 import com.maqs.moneytracker.model.Category;
 import com.maqs.moneytracker.services.DomainService;
+import com.maqs.moneytracker.types.AccountType;
 import com.maqs.moneytracker.types.Period;
 import com.wordnik.swagger.annotations.Api;
 
@@ -115,5 +117,63 @@ public class DomainController {
 		
 		List<Period> periods = new ArrayList<Period>(Period.values());
 		return periods;
+	}
+	
+	@RequestMapping(value="/accounttypes", method = RequestMethod.GET)
+	public @ResponseBody
+	List<AccountType> listAccountTypes()
+			throws ServiceException {
+		if (logger.isDebugEnabled())
+			logger.debug("listAccountTypes method is been called");		
+		List<AccountType> types = new ArrayList<AccountType>(AccountType.values());
+		return types;
+	}
+	
+	@RequestMapping(value="/categories", method = RequestMethod.PUT)
+	public @ResponseBody List<Category> storeCategories(@RequestBody List<Category> categories)
+			throws ServiceException {
+		logger.debug("storeCategories method is been called");
+		return domainService.storeCategories(categories);
+	}
+	
+	@RequestMapping(value="/accounts", method = RequestMethod.PUT)
+	public @ResponseBody List<Account> storeAccounts(@RequestBody List<Account> accounts)
+			throws ServiceException {
+		logger.debug("storeAccounts method is been called");
+		return domainService.storeAccounts(accounts);
+	}
+	
+	/**
+	 * Deletes the account.
+	 * 
+	 * @param id
+	 *            account id to be deleted.
+	 * @return true if deleted, otherwise false.
+	 * @throws ServiceException
+	 */
+	@RequestMapping(value="/account/{id}", method = RequestMethod.DELETE)
+	public @ResponseBody
+	boolean deleteAccount(@PathVariable("id") Long id)
+			throws ServiceException {
+		if (logger.isDebugEnabled())
+			logger.debug("deleteAccount method is been called");
+		return domainService.deleteAccount(id);
+	}
+	
+	/**
+	 * Deletes the Category.
+	 * 
+	 * @param id
+	 *            category id to be deleted.
+	 * @return true if deleted, otherwise false.
+	 * @throws ServiceException
+	 */
+	@RequestMapping(value="/category/{id}", method = RequestMethod.DELETE)
+	public @ResponseBody
+	boolean deleteCategory(@PathVariable("id") Long id)
+			throws ServiceException {
+		if (logger.isDebugEnabled())
+			logger.debug("deleteAccount method is been called");
+		return domainService.deleteCategory(id);
 	}
 }

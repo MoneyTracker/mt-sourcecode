@@ -56,11 +56,10 @@ public class Transaction extends BaseEntity {
 	private String message;
 	
 	private String messageType;
-	
+		
 	public Transaction() {
 		onDate = getCreatedOn();
 		amount = BigDecimal.ZERO;
-//		setTransactionType(TransactionType.EXPENSE);
 	}
 
 	public BigDecimal getAmount() {
@@ -210,4 +209,5 @@ public class Transaction extends BaseEntity {
 	public void setOriginalChecksum(String originalChecksum) {
 		this.originalChecksum = originalChecksum;
 	}
+
 }

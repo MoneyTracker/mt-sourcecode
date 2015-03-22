@@ -28,6 +28,7 @@ import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
+import com.maqs.moneytracker.common.transferobjects.Action;
 import com.maqs.moneytracker.common.transferobjects.Entity;
 import com.maqs.moneytracker.common.util.AppUtil;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
@@ -40,6 +41,7 @@ import com.maqs.moneytracker.model.DataField;
 import com.maqs.moneytracker.model.DataMap;
 import com.maqs.moneytracker.model.ImportedTransaction;
 import com.maqs.moneytracker.model.Transaction;
+import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
 import com.maqs.moneytracker.types.MessageType;
@@ -55,9 +57,9 @@ public class ImportServiceImpl implements ImportService {
 
 	@Autowired
 	private TransactionService transactionService;
-	
-	private QuerySpec bankStatementQuerySpec = new QuerySpec(
-			BankStatement.class.getName());
+
+	@Autowired
+	private LoggedInChecker loggedInChecker;
 
 	public ImportServiceImpl() {
 
@@ -84,8 +86,9 @@ public class ImportServiceImpl implements ImportService {
 		List<BankStatement> statements = null;
 		try {
 			logger.debug("listAll() is been called");
-			statements = (List<BankStatement>) dao.listAll(
-					bankStatementQuerySpec, page);
+			QuerySpec querySpec = loggedInChecker
+					.getQuerySpec(BankStatement.class);
+			statements = (List<BankStatement>) dao.listAll(querySpec, page);
 		} catch (DataAccessException e) {
 			throw new ServiceException(e);
 		}
@@ -100,6 +103,11 @@ public class ImportServiceImpl implements ImportService {
 			throws ServiceException {
 		try {
 			logger.debug("store() is been called");
+			int actionIndex = s.getAction().getActionIndex();
+			if (Action.CREATE_NEW == actionIndex) {
+				Long userId = loggedInChecker.getCurrentUserId();
+				s.setUserId(userId);
+			}
 			s = (BankStatement) dao.saveOrUpdate(s);
 			storeColumnMaps(s);
 			storeDataMaps(s);
@@ -112,7 +120,12 @@ public class ImportServiceImpl implements ImportService {
 	private void storeColumnMaps(BankStatement s) throws ServiceException {
 		List<ColumnMap> columnMaps = s.getColumnMaps();
 		if (CollectionsUtil.isNonEmpty(columnMaps)) {
+			Long userId = loggedInChecker.getCurrentUserId();
 			for (ColumnMap columnMap : columnMaps) {
+				int actionIndex = columnMap.getAction().getActionIndex();
+				if (Action.CREATE_NEW == actionIndex) {
+					columnMap.setUserId(userId);
+				}
 				columnMap.setBankStatementId(s.getId());
 			}
 			try {
@@ -126,8 +139,13 @@ public class ImportServiceImpl implements ImportService {
 
 	private void storeDataMaps(BankStatement s) throws ServiceException {
 		List<DataMap> dataMaps = s.getDataMaps();
+		Long userId = loggedInChecker.getCurrentUserId();
 		if (CollectionsUtil.isNonEmpty(dataMaps)) {
 			for (DataMap dataMap : dataMaps) {
+				int actionIndex = dataMap.getAction().getActionIndex();
+				if (Action.CREATE_NEW == actionIndex) {
+					dataMap.setUserId(userId);
+				}
 				dataMap.setBankStatementId(s.getId());
 			}
 			try {
@@ -138,6 +156,11 @@ public class ImportServiceImpl implements ImportService {
 					List<DataField> fields = dataMap.getDataFields();
 					if (CollectionsUtil.isNonEmpty(fields)) {
 						for (DataField dataField : fields) {
+							int actionIndex = dataField.getAction()
+									.getActionIndex();
+							if (Action.CREATE_NEW == actionIndex) {								
+								dataField.setUserId(userId);
+							}
 							dataField.setDataMapId(dataMap.getId());
 						}
 						dataFields.addAll(fields);
@@ -151,10 +174,11 @@ public class ImportServiceImpl implements ImportService {
 			}
 		}
 	}
-	
+
 	@Override
 	public List<Transaction> importBankStatement(Long bankStatementId,
-			MultipartFile file, int startRow, int endRow, String dateFormat) throws ServiceException {
+			MultipartFile file, int startRow, int endRow, String dateFormat)
+			throws ServiceException {
 		List<Transaction> transactions = null;
 
 		BankStatement bankStatement = getBankStatement(bankStatementId);
@@ -165,11 +189,11 @@ public class ImportServiceImpl implements ImportService {
 		if (startRow > 0) {
 			bankStatement.setStartRow(startRow);
 		}
-		
-		if (! StringUtil.nullOrEmpty(dateFormat)) {
+
+		if (!StringUtil.nullOrEmpty(dateFormat)) {
 			bankStatement.setDateFormat(dateFormat);
 		}
-		
+
 		if (endRow > 0) {
 			bankStatement.setEndRow(endRow);
 		}
@@ -181,7 +205,8 @@ public class ImportServiceImpl implements ImportService {
 			String fileName = f.getName();
 			List rowObjects = null;
 			if (fileName.toLowerCase().endsWith(ExcelProcessor.EXCEL_EXTN)
-					|| fileName.toLowerCase().endsWith(ExcelProcessor.EXCELX_EXTN)) {
+					|| fileName.toLowerCase().endsWith(
+							ExcelProcessor.EXCELX_EXTN)) {
 				Workbook workbook = getWorkbook(f);
 				rowObjects = ExcelProcessor.getRowObjects(bankStatement,
 						workbook, Transaction.class);
@@ -191,7 +216,7 @@ public class ImportServiceImpl implements ImportService {
 			}
 
 			transactions = processRawObjects(bankStatement, rowObjects);
-			
+
 		} catch (Exception e) {
 			throw new ServiceException(e.getMessage(), e);
 		} finally {
@@ -203,7 +228,8 @@ public class ImportServiceImpl implements ImportService {
 		return transactions;
 	}
 
-	private List<Transaction> processRawObjects(BankStatement bankStatement, List rowObjects) throws ServiceException {
+	private List<Transaction> processRawObjects(BankStatement bankStatement,
+			List rowObjects) throws ServiceException {
 		List<Transaction> transactions = null;
 		if (CollectionsUtil.isNonEmpty(rowObjects)) {
 			transactions = new ArrayList<Transaction>();
@@ -213,14 +239,14 @@ public class ImportServiceImpl implements ImportService {
 					transactions.add(t);
 				}
 			}
-			
+
 			Set<String> checksumList = new HashSet<String>();
 			for (Transaction t : transactions) {
 				String checksum = transactionService.getChecksum(t);
 				checksumList.add(checksum);
 				t.setOriginalChecksum(checksum);
 			}
-			
+
 			List<ImportedTransaction> importedTransactions = listByChecksum(checksumList);
 			Set<String> duplicateChecksumList = getChecksumList(importedTransactions);
 			for (Transaction t : transactions) {
@@ -230,15 +256,15 @@ public class ImportServiceImpl implements ImportService {
 					t.setMessageType(MessageType.TYPE_ERROR);
 				}
 			}
-			
+
 			try {
 				applyDataMap(bankStatement, transactions);
 			} catch (Exception e) {
 				throw new ServiceException(e.getMessage(), e);
-			} 
-			
+			}
+
 			transactionService.fetchCategories(transactions);
-			transactionService.fetchAccounts(transactions);				
+			transactionService.fetchAccounts(transactions);
 		}
 		return transactions;
 	}
@@ -252,13 +278,15 @@ public class ImportServiceImpl implements ImportService {
 		return checksumList;
 	}
 
-	private List<ImportedTransaction> listByChecksum(
-			Set<String> checksumList) throws ServiceException {
-		if (! CollectionsUtil.isNonEmpty(checksumList)) {
+	private List<ImportedTransaction> listByChecksum(Set<String> checksumList)
+			throws ServiceException {
+		if (!CollectionsUtil.isNonEmpty(checksumList)) {
 			return null;
 		}
-		QuerySpec querySpec = new QuerySpec(ImportedTransaction.class.getName());
-		querySpec.addPropertySpec(new PropertySpec(ImportedTransaction.CHECKSUM, Operation.IN, checksumList));
+		QuerySpec querySpec = loggedInChecker
+				.getQuerySpec(ImportedTransaction.class);
+		querySpec.addPropertySpec(new PropertySpec(
+				ImportedTransaction.CHECKSUM, Operation.IN, checksumList));
 		List<ImportedTransaction> list = null;
 		try {
 			list = (List<ImportedTransaction>) dao.listAll(querySpec);
@@ -379,7 +407,8 @@ public class ImportServiceImpl implements ImportService {
 	}
 
 	@Override
-	public BankStatement getBankStatementDetails(BankStatement s) throws ServiceException {
+	public BankStatement getBankStatementDetails(BankStatement s)
+			throws ServiceException {
 		logger.debug("getBankStatementDetails() is been called");
 		if (s == null) {
 			throw new IllegalArgumentException("given statement is null");
@@ -396,14 +425,14 @@ public class ImportServiceImpl implements ImportService {
 		loadBankStatementDetails(s);
 		return s;
 	}
-	
+
 	private void loadBankStatementDetails(BankStatement s)
 			throws ServiceException {
 		if (s != null) {
 			try {
 				Long id = s.getId();
-				QuerySpec columnMapSpec = new QuerySpec(
-						ColumnMap.class.getName());
+				QuerySpec columnMapSpec = loggedInChecker
+						.getQuerySpec(ColumnMap.class);
 				columnMapSpec.addPropertySpec(new PropertySpec(
 						ColumnMap.BANK_ST_ID, id));
 
@@ -411,19 +440,23 @@ public class ImportServiceImpl implements ImportService {
 						.listAll(columnMapSpec);
 				s.setColumnMaps(columnMaps);
 
-				QuerySpec dataMapSpec = new QuerySpec(DataMap.class.getName());
+				QuerySpec dataMapSpec = loggedInChecker
+						.getQuerySpec(DataMap.class);
 				dataMapSpec.addPropertySpec(new PropertySpec(
 						ColumnMap.BANK_ST_ID, id));
 				List<DataMap> dataMaps = (List<DataMap>) dao
 						.listAll(dataMapSpec);
 				s.setDataMaps(dataMaps);
-				
+
 				if (CollectionsUtil.isNonEmpty(dataMaps)) {
 					Set<Long> dataMapIds = AppUtil.getIds(dataMaps);
-					Map<Long, List<? extends Entity>> map = dao.listChildrenByParentIds(DataField.class, DataField.DATA_MAP_ID, dataMapIds);
+					Map<Long, List<? extends Entity>> map = dao
+							.listChildrenByParentIds(DataField.class,
+									DataField.DATA_MAP_ID, dataMapIds);
 					for (DataMap dataMap : dataMaps) {
 						Long dataId = dataMap.getId();
-						List<DataField> dataFields = (List<DataField>) map.get(dataId);
+						List<DataField> dataFields = (List<DataField>) map
+								.get(dataId);
 						dataMap.setDataFields(dataFields);
 					}
 				}
@@ -437,16 +470,19 @@ public class ImportServiceImpl implements ImportService {
 	 * {@inheritDoc}
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
-	public List<ImportedTransaction> storeImportedTransactions(List<Transaction> transactions)
-			throws ServiceException {
+	public List<ImportedTransaction> storeImportedTransactions(
+			List<Transaction> transactions) throws ServiceException {
 		List<ImportedTransaction> importedTransactions = null;
 		if (CollectionsUtil.isNonEmpty(transactions)) {
-			importedTransactions = new ArrayList<ImportedTransaction>(transactions.size());
+			importedTransactions = new ArrayList<ImportedTransaction>(
+					transactions.size());
+			Long userId = loggedInChecker.getCurrentUserId();
 			for (Transaction t : transactions) {
 				ImportedTransaction i = new ImportedTransaction();
 				i.setTransactionId(t.getId());
 				i.setChecksum(t.getOriginalChecksum());
 				importedTransactions.add(i);
+				i.setUserId(userId);
 			}
 			try {
 				dao.saveAll(importedTransactions);
@@ -456,6 +492,5 @@ public class ImportServiceImpl implements ImportService {
 		}
 		return importedTransactions;
 	}
-	
-	
+
 }

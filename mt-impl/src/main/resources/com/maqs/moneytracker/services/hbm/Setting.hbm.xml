@@ -4,7 +4,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	
-	<class name="com.maqs.moneytracker.model.Setting" table="SETTING">
+	<class name="com.maqs.moneytracker.model.Setting" table="setting">
 		<meta attribute="class-description">This class contains Setting details.</meta>
 		<id name="id" type="long" column="ID">
 			<generator class="native" />
@@ -17,6 +17,8 @@
 		<property name="type" type="string" column="type" />
 		
 		<property name="value" type="string" column="value" />
+		
+		<property name="userId" type="long" column="user_id" />
 		
 		<!-- <property name="createdOn" type="timestamp"  column="CREATED_DATE" />
 		

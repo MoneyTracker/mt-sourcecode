@@ -25,6 +25,8 @@ public abstract class BaseEntity extends Entity implements Serializable {
 
 	protected transient Logger logger = Logger.getLogger(getClass());
 
+	protected Long userId;
+	
 	public BaseEntity() {
 	}
 
@@ -44,6 +46,13 @@ public abstract class BaseEntity extends Entity implements Serializable {
 		this.lastModifiedOn = lastModifiedOn;
 	}
 
+	public Long getUserId() {
+		return userId;
+	}
+	
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	} 
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this,

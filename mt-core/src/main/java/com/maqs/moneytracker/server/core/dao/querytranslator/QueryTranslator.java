@@ -57,9 +57,9 @@ public class QueryTranslator {
 
 	private static final String NOTEQ_TEXT = "!=";
 
-	private static final String ISNULL_TEXT = "is null";
+	private static final String ISNULL_TEXT = " is null ";
 	
-	private static final String IS_NOT_NULL_TEXT = "is not null";
+	private static final String IS_NOT_NULL_TEXT = " is not null ";
 
 	private static final String IN_TEXT = " in ";
 
@@ -387,11 +387,12 @@ public class QueryTranslator {
 		case GTE:
 		case LTE:
 		case NOTEQUAL:
-		case ISNULL:
-		case IS_NOT_NULL:
 			values.add(value);
 			break;
 
+		case ISNULL:
+		case IS_NOT_NULL: break; // do nothing
+		
 		case BETWEEN:
 			if (value instanceof Object[]) {
 				Object[] array = (Object[]) value;

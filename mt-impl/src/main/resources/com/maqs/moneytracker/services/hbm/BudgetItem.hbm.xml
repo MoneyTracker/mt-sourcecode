@@ -4,7 +4,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	
-	<class name="com.maqs.moneytracker.model.BudgetItem" table="BUDGET_ITEM">
+	<class name="com.maqs.moneytracker.model.BudgetItem" table="budget_item">
 		<meta attribute="class-description">This class contains Budget Item details.</meta>
 		<id name="id" type="long" column="ID">
 			<generator class="native" />
@@ -18,6 +18,7 @@
 		
 		<property name="amount" type="big_decimal" column="AMOUNT" />
 		
+		<property name="userId" type="long" column="user_id" />
 		<!-- <property name="createdOn" type="timestamp"  column="CREATED_DATE" />
 		
 		<property name="lastModifiedOn" type="timestamp"  column="MODIFIED_DATE" /> -->
@@ -27,6 +28,6 @@
 		<return-scalar column="amount" type="big_decimal"/>
 			<![CDATA[
 			select sum(i.amount) as amount 
-			from budget_item i where i.BUDGET_ID = ?]]>
+			from budget_item i where i.BUDGET_ID = ? and i.user_id = ?]]>
 	</sql-query>
 </hibernate-mapping>

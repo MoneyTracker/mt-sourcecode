@@ -1,23 +1,22 @@
-ALTER TABLE transaction ADD INDEX `tran_idx_date` (`ON_DATE`);
+ALTER TABLE account ADD INDEX `account_idx_userid` (`USER_ID`);
 
-ALTER TABLE transaction ADD INDEX `tran_idx_account` (`ACCT_ID`);
+ALTER TABLE bnk_stmnt ADD INDEX `bnk_stmnt_idx_userid` (`USER_ID`);
 
-ALTER TABLE transaction ADD INDEX `tran_idx_cat` (`CAT_ID`);
+ALTER TABLE bnk_stmnt_col_map ADD INDEX `bnk_stmnt_col_map_idx_userid` (`USER_ID`);
 
-ALTER TABLE transaction ADD INDEX `tran_idx_amt` (`AMOUNT`);
+ALTER TABLE bnk_stmnt_data_field ADD INDEX `bnk_stmnt_data_field_idx_userid` (`USER_ID`);
 
-ALTER TABLE transaction ADD INDEX `tran_idx_rec` (`IS_REC`);
+ALTER TABLE bnk_stmnt_data_map ADD INDEX `bnk_stmnt_data_map_idx_userid` (`USER_ID`);
 
-ALTER TABLE ACCOUNT ADD INDEX `acct_idx_name` (`NAME`);
+ALTER TABLE budget ADD INDEX `budget_idx_userid` (`USER_ID`);
 
-ALTER TABLE ACCOUNT ADD INDEX `acct_idx_accttype` (`ACCT_TYPE`)
+ALTER TABLE budget_item ADD INDEX `budget_item_idx_userid` (`USER_ID`);
 
-ALTER TABLE ACCOUNT ADD INDEX `acct_idx_display` (`DISPLAY`);
+ALTER TABLE future_transaction ADD INDEX `future_transaction_idx_userid` (`USER_ID`);
 
-ALTER TABLE CATEGORY ADD INDEX `cat_idx_name` (`NAME`);
+ALTER TABLE setting ADD INDEX `setting_idx_userid` (`USER_ID`);
 
-ALTER TABLE CATEGORY ADD INDEX `cat_idx_trantype` (`TRAN_TYPE`);
+ALTER TABLE transaction ADD INDEX `transaction_idx_userid` (`USER_ID`);
 
-ALTER TABLE CATEGORY ADD INDEX `cat_idx_parent_cat` (`PRNT_CAT_ID`);
+ALTER TABLE user_def_cat ADD INDEX `user_def_cat_idx_userid` (`USER_ID`);
 
-ALTER TABLE TRANSACTION ADD INDEX `tran_idx_checksum` (`CHECKSUM`);

@@ -52,14 +52,13 @@ public class CustomTokenAuthenticationFilter extends
 	@Override
 	protected boolean requiresAuthentication(HttpServletRequest request,
 			HttpServletResponse response) {
-		/*Enumeration<String> headers = request.getHeaderNames();
-		while (headers.hasMoreElements()) {
-			String header = headers.nextElement();
-			System.out.println(header + " " + request.getHeader(header));
-		}*/
 		String token = request.getHeader(HEADER_SECURITY_TOKEN);
 		boolean requires = token != null;
-		logger.info("requiresAuthentication:" + requires + " token: " + token);
+		if (!requires) {
+			logger.error("there is no token in the request");
+		} else {
+			logger.info("requiresAuthentication:" + requires + " token: " + token);
+		}
 		return requires;
 	}
 	/**

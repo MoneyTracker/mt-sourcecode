@@ -4,7 +4,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	
-	<class name="com.maqs.moneytracker.model.BankStatement" table="BNK_STMNT">
+	<class name="com.maqs.moneytracker.model.BankStatement" table="bnk_stmnt">
 		<meta attribute="class-description">This class contains BankStatement details.</meta>
 		<id name="id" type="long" column="ID">
 			<generator class="native" />
@@ -18,6 +18,7 @@
 		
 		<property name="startRow" type="int" column="START_ROW" />
 		
+		<property name="userId" type="long" column="user_id" />
 		<!-- <property name="createdOn" type="timestamp"  column="CREATED_DATE" />
 		
 		<property name="lastModifiedOn" type="timestamp"  column="MODIFIED_DATE" /> -->

@@ -2,8 +2,10 @@ package com.maqs.moneytracker.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,17 +14,22 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.maqs.moneytracker.common.ValidationException;
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.paging.spec.Operation;
+import com.maqs.moneytracker.common.paging.spec.OrderBySpec;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
+import com.maqs.moneytracker.common.transferobjects.Action;
 import com.maqs.moneytracker.common.transferobjects.Entity;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.Util;
 import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
 import com.maqs.moneytracker.model.Category;
+import com.maqs.moneytracker.model.Transaction;
+import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
 import com.maqs.moneytracker.types.AccountType;
@@ -37,7 +44,8 @@ public class DomainServiceImpl implements DomainService {
 	@Autowired
 	private IDao dao = null;
 
-	private QuerySpec accountsQuery = new QuerySpec(Account.class.getName());
+	@Autowired
+	private LoggedInChecker loggedInChecker;
 	
 	private Map<Long, Category> categoriesCacheMap;
 	
@@ -49,7 +57,6 @@ public class DomainServiceImpl implements DomainService {
 
 	public DomainServiceImpl(IDao dao) {
 		setDao(dao);
-		// cache purpose
 	}
 
 	public void setDao(IDao categoryDao) {
@@ -67,7 +74,7 @@ public class DomainServiceImpl implements DomainService {
 	public List<Category> listByType(TransactionType transactionType, Page page)
 			throws ServiceException {
 		List<Category> categories = null;
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
 		querySpec.addPropertySpec(new PropertySpec(Category.TRAN_TYPE,
 				Operation.EQ, transactionType.getCode()));
 		try {
@@ -82,9 +89,16 @@ public class DomainServiceImpl implements DomainService {
 	 * {@inheritDoc}
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
-	public List<Category> store(List<Category> categories)
+	public List<Category> storeCategories(List<Category> categories)
 			throws ServiceException {
 		try {
+			Long userId = loggedInChecker.getCurrentUserId();
+			for (Category category : categories) {
+				int actionIndex = category.getAction().getActionIndex();
+				if (Action.CREATE_NEW == actionIndex) {
+					category.setUserId(userId);
+				}
+			}
 			dao.saveAll(categories);
 		} catch (DataAccessException e) {
 			throw new ServiceException(e);
@@ -92,6 +106,27 @@ public class DomainServiceImpl implements DomainService {
 		return categories;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+	public List<Account> storeAccounts(List<Account> accounts)
+			throws ServiceException {
+		try {
+			Long userId = loggedInChecker.getCurrentUserId();
+			for (Account a : accounts) {
+				int actionIndex = a.getAction().getActionIndex();
+				if (Action.CREATE_NEW == actionIndex) {
+					a.setUserId(userId);
+				}
+			}
+			dao.saveAll(accounts);
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+		return accounts;
+	}
+	
 	@Override
 	public Category getCategoryByName(String categoryName)
 			throws ServiceException {
@@ -107,7 +142,7 @@ public class DomainServiceImpl implements DomainService {
 	@Override
 	public List<Account> listAccounts(Page page) throws ServiceException {
 		List<Account> accounts = null;
-		QuerySpec querySpec = new QuerySpec(Account.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Account.class);
 		try {
 			accounts = (List<Account>) dao.listAll(querySpec, page);
 		} catch (DataAccessException e) {
@@ -130,8 +165,7 @@ public class DomainServiceImpl implements DomainService {
 	@Override
 	public List<Category> listCategories(boolean parentsOnly, Page page) throws ServiceException {
 		List<Category> categories = null;
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
-		
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);		
 		try {
 			categories = (List<Category>) dao.listAll(querySpec, page);
 		} catch (DataAccessException e) {
@@ -150,7 +184,7 @@ public class DomainServiceImpl implements DomainService {
 			throw new IllegalArgumentException("given accountType is null");
 		}
 		List<Account> accounts = null;
-		QuerySpec querySpec = new QuerySpec(Account.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Account.class);
 		querySpec.addPropertySpec(new PropertySpec(Account.ACCT_TYPE,
 				Operation.EQ, accountType.getCode()));
 		try {
@@ -167,15 +201,19 @@ public class DomainServiceImpl implements DomainService {
 		if (dto == null) {
 			throw new IllegalArgumentException("dto is null...");
 		}
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
 		List<Long> categoryIds = dto.getCategoryIds();
 		if (CollectionsUtil.isNonEmpty(categoryIds)) {
 			querySpec.addPropertySpec(new PropertySpec(Category.ID, Operation.IN, categoryIds));
 		}
 		
-		String tranType = dto.getType();
+		String tranType = dto.getTransactionType();
 		if (tranType != null) {
 			querySpec.addPropertySpec(new PropertySpec(Category.TRAN_TYPE, tranType));
+		}
+		List<OrderBySpec> orderByList = dto.getOrderByList();
+		if (CollectionsUtil.isNonEmpty(orderByList)) {
+			querySpec.setOrderBySpecs(orderByList);
 		}
 		Page page = dto.getPage();
 		List<? extends Entity> entities = list(querySpec, page);
@@ -214,15 +252,19 @@ public class DomainServiceImpl implements DomainService {
 		if (dto == null) {
 			throw new IllegalArgumentException("dto is null...");
 		}
-		QuerySpec querySpec = new QuerySpec(Account.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Account.class);
 		List<Long> accountIds = dto.getAccountIds();
 		if (CollectionsUtil.isNonEmpty(accountIds)) {
 			querySpec.addPropertySpec(new PropertySpec(Account.ID, Operation.IN, accountIds));
 		}
 		
-		String acctType = dto.getType();
+		String acctType = dto.getAccountType();
 		if (acctType != null) {
 			querySpec.addPropertySpec(new PropertySpec(Account.ACCT_TYPE, acctType));
+		}
+		List<OrderBySpec> orderByList = dto.getOrderByList();
+		if (CollectionsUtil.isNonEmpty(orderByList)) {
+			querySpec.setOrderBySpecs(orderByList);
 		}
 		Page page = dto.getPage();
 		return (List<Account>) list(querySpec, page);
@@ -282,19 +324,37 @@ public class DomainServiceImpl implements DomainService {
 		if (dto == null) {
 			throw new IllegalArgumentException("dto is null...");
 		}
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
 		List<Long> categoryIds = dto.getCategoryIds();
 		if (CollectionsUtil.isNonEmpty(categoryIds)) {
 			querySpec.addPropertySpec(new PropertySpec(Category.ID, Operation.IN, categoryIds));
 		}
 		
-		String tranType = dto.getType();
+		String tranType = dto.getTransactionType();
 		if (tranType != null) {
 			querySpec.addPropertySpec(new PropertySpec(Category.TRAN_TYPE, tranType));
 		}
+		querySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, Operation.ISNULL, null));
+		List<OrderBySpec> orderByList = dto.getOrderByList();
+		if (CollectionsUtil.isNonEmpty(orderByList)) {
+			querySpec.setOrderBySpecs(orderByList);
+		}
 		Page page = dto.getPage();
 		List<? extends Entity> entities = list(querySpec, page);
-		List<Category> categories = (List<Category>) entities;
+		List<Category> parentCategories = (List<Category>) entities;
+		if (CollectionsUtil.isNullOrEmpty(parentCategories)) {
+			return null;
+		}	
+		Set<Long> parentCatIds = new HashSet<Long>();
+		for (Category parent : parentCategories) {
+			Long parentCatId = parent.getId();
+			parentCatIds.add(parentCatId);
+		}
+		dto.setCategoryIds(new ArrayList<Long>(parentCatIds));
+		List<Category> childCategories = listChildCategories(dto);
+		List<Category> categories = new ArrayList<Category>();
+		categories.addAll(parentCategories);
+		categories.addAll(childCategories);
 		return prepareCategoryTree(categories);
 	}
 
@@ -308,7 +368,9 @@ public class DomainServiceImpl implements DomainService {
 					categoryTree.add(c);
 				} else {
 					Category parent = (Category) map.get(parentId);
-					parent.addChild(c);
+					if (parent != null) {
+						parent.addChild(c);
+					}
 				}
 			}
 			return categoryTree;
@@ -322,7 +384,7 @@ public class DomainServiceImpl implements DomainService {
 		if (dto == null) {
 			throw new IllegalArgumentException("dto is null...");
 		}
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
 		querySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, Operation.ISNULL, null));
 		Page page = dto.getPage();
 		List<? extends Entity> entities = list(querySpec, page);
@@ -337,14 +399,60 @@ public class DomainServiceImpl implements DomainService {
 			throw new IllegalArgumentException("dto is null...");
 		}
 		List<Long> parentCategoryIds = dto.getCategoryIds();
-		if (! CollectionsUtil.isNonEmpty(parentCategoryIds)) {
+		if (CollectionsUtil.isNullOrEmpty(parentCategoryIds)) {
 			throw new IllegalArgumentException("given parentIds collection is null or empty...");
 		}
-		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
 		querySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, Operation.IN, parentCategoryIds));
-		Page page = dto.getPage();
+		List<OrderBySpec> orderByList = dto.getOrderByList();
+		if (CollectionsUtil.isNonEmpty(orderByList)) {
+			querySpec.setOrderBySpecs(orderByList);
+		}
+		Page page = null; // don't want to have paging on child items
 		List<? extends Entity> entities = list(querySpec, page);
 		List<Category> categories = (List<Category>) entities;
 		return categories;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+	public boolean deleteAccount(Long id) throws ServiceException {
+		if (id == null) {
+			throw new ValidationException("given id is null");
+		}
+		try {
+			dao.removeEntity(Account.class, id);
+			return true;
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+	public boolean deleteCategory(Long id) throws ServiceException {
+		if (id == null) {
+			throw new ValidationException("given id is null");
+		}
+		try {
+			dao.removeEntity(Category.class, id);
+			return true;
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+	}
+	
+	@Override
+	public Map<Long, Entity> fetchCategoryMap(Set<Long> ids) throws ServiceException {
+		DomainSearchDto dto = new DomainSearchDto();
+		dto.setCategoryIds(new ArrayList<Long>(ids));
+		List<Category> categories = listCategories(dto);
+		Map<Long, Entity> map = com.maqs.moneytracker.common.util.Util
+				.getMap(categories);
+		return map;
 	}
 }
