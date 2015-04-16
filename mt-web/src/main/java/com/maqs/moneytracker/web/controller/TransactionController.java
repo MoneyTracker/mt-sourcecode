@@ -190,6 +190,23 @@ public class TransactionController {
 		return transactionService.delete(id);
 	}
 	
+	/**
+	 * Deletes the list of transactions.
+	 * 
+	 * @param transactions
+	 *            transactions to be deleted.
+	 * @return true if deleted, otherwise false.
+	 * @throws ServiceException
+	 */
+	@RequestMapping(value="/deleteall", method = RequestMethod.DELETE)
+	public @ResponseBody
+	boolean deleteAll(@RequestBody List<Transaction> transactions)
+			throws ServiceException {
+		if (logger.isDebugEnabled())
+			logger.debug("deleteAll method is been called");
+		return transactionService.deleteAll(transactions);
+	}
+	
 	@RequestMapping(value = "expensetotalbyreport", method = RequestMethod.GET)
 	public @ResponseBody
 	BigDecimal getExpenseTotalAmount(@RequestParam(value="reportBy", required = true) Report reportBy) throws ServiceException {

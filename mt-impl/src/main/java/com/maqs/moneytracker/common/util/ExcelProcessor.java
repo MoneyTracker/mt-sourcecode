@@ -137,6 +137,7 @@ public class ExcelProcessor {
 									String format = bankStatement.getDateFormat();
 									try {
 										o = DateUtil.getDate(value, format);
+										AppUtil.setFieldValue(rowObject, Transaction.DATE_STRING, value);
 									} catch (ParseException e) {
 										break columnloop;
 									}

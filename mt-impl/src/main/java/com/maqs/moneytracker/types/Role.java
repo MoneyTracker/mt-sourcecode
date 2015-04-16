@@ -66,7 +66,6 @@ public class Role extends BaseEntity implements GrantedAuthority {
 	public void setCode(String code) {
 		this.code = code;
 		Role role = valueOf(code);
-		System.out.println("role code " + code);
 		if (role != null) {
 			this.code = role.code;
 			this.name = role.name;
@@ -133,5 +132,8 @@ public class Role extends BaseEntity implements GrantedAuthority {
 		return getName();
 	}
 	
-	
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

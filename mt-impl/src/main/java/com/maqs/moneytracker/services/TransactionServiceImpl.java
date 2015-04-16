@@ -29,6 +29,7 @@ import com.maqs.moneytracker.common.util.AppUtil;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.DateUtil;
 import com.maqs.moneytracker.common.util.StringUtil;
+import com.maqs.moneytracker.common.util.Util;
 import com.maqs.moneytracker.dto.AccountDto;
 import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.dto.TransactionDto;
@@ -200,7 +201,11 @@ public class TransactionServiceImpl implements TransactionService {
 		if (Action.CREATE_NEW == actionIndex) {
 			Long userId = loggedInChecker.getCurrentUserId();
 			current.setUserId(userId);
-		}
+			
+/*			Date onDate = current.getCreatedOn();
+			onDate = DateUtil.getDateWithoutTime(onDate);
+			current.setCreatedOn(onDate);
+*/		}
 		if (Action.CREATE_NEW == actionIndex || Action.UPDATE == actionIndex) {
 			String checksum = getChecksum(current);
 			current.setChecksum(checksum);
@@ -502,6 +507,10 @@ public class TransactionServiceImpl implements TransactionService {
 			throws ServiceException {
 		Transaction transaction = null;
 		try {
+			Long catId = category.getId();
+			if (catId == null) {
+				throw new IllegalArgumentException("categoryId is required.");
+			}
 			Long userId = loggedInChecker.getCurrentUserId();
 			Object[] params = { category.getId(), userId };
 			List<Transaction> transactions = dao.executeNamedSQLQuery(
@@ -562,6 +571,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public BigDecimal getTotalAmount(String tranType, Report reportBy)
 			throws ServiceException {
 		Date[] range = DateUtil.getRange(reportBy);
+		System.out.println("getTOtalAmount " + range[0] + " " + range[1]);
 		TransactionSearchDto dto = new TransactionSearchDto();
 		dto.setTranType(tranType);
 		dto.setFromDate(range[0]);
@@ -670,6 +680,7 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	private Date[] getRange(TransactionSearchDto dto) {
+		logger.debug("b4 from : " + dto.getFromDate() + " to: " + dto.getToDate());
 		Date from = dto.getFromDate();
 		Date to = null;
 		if (from != null) {
@@ -679,6 +690,7 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 			from = DateUtil.getDateWithoutTime(from);
 			to = DateUtil.getDateWithoutTime(to);
+			logger.debug("after from : " + from + " to: " + to);
 			return new Date[] {from, to};
 		}
 		return null;
@@ -739,8 +751,9 @@ public class TransactionServiceImpl implements TransactionService {
 			return transactions;
 		}
 		try {
+			Date[] range = getRange(searchDto);
 			Long userId = loggedInChecker.getCurrentUserId();
-			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.EXPENSE, userId };
+			Object[] params = { range[0], range[1], TransactionType.EXPENSE, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					TRAN_TYPE_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -758,8 +771,9 @@ public class TransactionServiceImpl implements TransactionService {
 			throws ServiceException {
 		List<TransactionDto> transactions = null;
 		try {
+			Date[] range = getRange(searchDto);
 			Long userId = loggedInChecker.getCurrentUserId();
-			Object[] params = { searchDto.getFromDate(), searchDto.getToDate(), TransactionType.INCOME, userId };
+			Object[] params = { range[0], range[1], TransactionType.INCOME, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					TRAN_TYPE_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -772,18 +786,10 @@ public class TransactionServiceImpl implements TransactionService {
 	public List<TransactionDto> sumByExpenseCategories(TransactionSearchDto searchDto)
 			throws ServiceException {
 		List<TransactionDto> transactions = null;
-		Date from = searchDto.getFromDate();
-		if (from == null) {
-			throw new IllegalArgumentException("fromDate is null");
-		}
-		Date to = searchDto.getToDate();
-		if (to == null) {
-			throw new IllegalArgumentException("toDate is null");
-		}
-		
+		Date[] range = getRange(searchDto);
 		try {
 			Long userId = loggedInChecker.getCurrentUserId();
-			Object[] params = { from, to, TransactionType.EXPENSE, userId };
+			Object[] params = { range[0], range[1], TransactionType.EXPENSE, userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					SUM_BY_CATEGORIES_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -1019,11 +1025,13 @@ public class TransactionServiceImpl implements TransactionService {
 		} else {
 			dates = DateUtil.getHistoricalRange(noOfMonths);
 		}
-		
+		searchDto.setFromDate(dates[0]);
+		searchDto.setToDate(dates[1]);
+		Date[] range = getRange(searchDto);
 		List<TransactionDto> transactions = null;
 		try {			
 			Long userId = loggedInChecker.getCurrentUserId();
-			Object[] params = { dates[0], dates[1], userId };
+			Object[] params = { range[0], range[1], userId };
 			transactions = (List<TransactionDto>) dao.executeNamedSQLQuery(
 					GET_MONTHLY_INC_EXP_REPORT, params, TransactionDto.class);
 		} catch (DataAccessException e) {
@@ -1036,6 +1044,23 @@ public class TransactionServiceImpl implements TransactionService {
 	public List<FutureTransaction> listFutureTransactions(QuerySpec querySpec,
 			Page page) throws ServiceException {
 		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+	public boolean deleteAll(List<Transaction> transactions) throws ServiceException {
+		if (CollectionsUtil.isNullOrEmpty(transactions)) {
+			throw new IllegalArgumentException("given transactions list is empty");
+		}
+		try {
+			Set<Long> ids = Util.getIds(transactions);
+			dao.removeAll(Transaction.class, Transaction.ID, Operation.IN, ids);
+			return true;
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
 	}
 	
 }

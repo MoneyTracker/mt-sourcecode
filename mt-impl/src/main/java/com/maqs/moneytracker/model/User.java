@@ -69,4 +69,9 @@ public class User extends BaseEntity {
 		}
 		roles.remove(role);
 	}
+	
+	@Override
+	public String toString() {
+		return getUsername();
+	}
 }

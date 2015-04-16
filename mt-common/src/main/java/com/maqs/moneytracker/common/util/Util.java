@@ -1,5 +1,6 @@
 package com.maqs.moneytracker.common.util;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -369,5 +370,15 @@ public class Util {
 			return id1.intValue() - id2.intValue();
 		}
 	};
-	
+
+	public static String getTempDirectory() {
+		String tmpdir = System.getProperty("java.io.tmpdir");
+		if (tmpdir == null) {
+			tmpdir = File.separator;
+		}
+		if (!tmpdir.endsWith(File.separator)) {
+			tmpdir += File.separator;
+		}
+		return tmpdir;
+	}
 }

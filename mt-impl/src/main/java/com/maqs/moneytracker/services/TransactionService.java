@@ -41,7 +41,7 @@ public interface TransactionService {
 
 	public Category getMaxCategory(QuerySpec querySpec) throws ServiceException;
 
-	public Transaction getLastTransaction(Category newCat) throws ServiceException;
+	public Transaction getLastTransaction(Category category) throws ServiceException;
 
 	public List<TransactionDto> listTopExpensesCategories(int numExp, Report reportBy) throws ServiceException;
 	
@@ -89,4 +89,6 @@ public interface TransactionService {
 	public List<TransactionDto> listIncExpHistoryReport(TransactionSearchDto searchDto) throws ServiceException;
 	
 	public List<FutureTransaction> listFutureTransactions(QuerySpec querySpec, Page page) throws ServiceException;
+
+	public boolean deleteAll(List<Transaction> transactions) throws ServiceException;
 }

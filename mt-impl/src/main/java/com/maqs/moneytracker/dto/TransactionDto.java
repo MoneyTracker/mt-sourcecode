@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.maqs.moneytracker.common.util.DateUtil;
 
 @JsonInclude(Include.NON_NULL)
 public class TransactionDto {
@@ -35,6 +36,8 @@ public class TransactionDto {
 	
 	private List<TransactionDto> children;
 	
+	private String period;
+	
 	public TransactionDto() {
 		
 	}
@@ -51,6 +54,10 @@ public class TransactionDto {
 
 	public void setOnDate(Date onDate) {
 		this.onDate = onDate;
+		if (onDate != null) {
+			String period = DateUtil.getMonthYear(onDate);
+			setPeriod(period);
+		}
 	}
 
 	public BigDecimal getAmount() {
@@ -126,6 +133,14 @@ public class TransactionDto {
 
 	public void removeChild(TransactionDto c) {
 		children.remove(c);
+	}
+	
+	public String getPeriod() {
+		return period;
+	}
+	
+	public void setPeriod(String period) {
+		this.period = period;
 	}
 	@Override
 	public String toString() {

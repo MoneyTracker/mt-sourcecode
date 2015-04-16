@@ -39,11 +39,6 @@ public class TokenManagerImpl implements TokenManager {
 
 	private static final String SEPARATOR = ":";
 
-	/**
-	 * 
-	 */
-	private Map<String, MyUserDetails> loggedInTokenMap = new HashMap<String, MyUserDetails>();
-
 	public TokenManagerImpl() {
 		cipherGenerator = new CipherGenerator();
 		cipherGenerator.setSalt(SALT);

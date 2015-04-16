@@ -14,80 +14,44 @@
 
 	<context:component-scan base-package="com.maqs.moneytracker.web.security" />
 
-	<bean id="tokenManager" class="com.maqs.moneytracker.security.TokenManagerImpl">
+	<security:http realm="Protected API" pattern="/api/**"
+		entry-point-ref="httpAuthenticationEntryPoint" use-expressions="true"
+		auto-config="false" create-session="stateless"
+		authentication-manager-ref="noOpAuthenticationManager">
+		<security:intercept-url pattern="/**" access="permitAll" />
+		<security:intercept-url pattern="/user/token"
+			access="permitAll" />
+
+		<security:custom-filter ref="authenticationTokenProcessingFilter"
+			position="FORM_LOGIN_FILTER" />
+
+		<security:intercept-url pattern="/api/**"
+			access="isAuthenticated()" />
+
+		<!-- <security:logout logout-url="/user/logout" delete-cookies="true" /> -->
+	</security:http>
+
+	<bean class="com.maqs.moneytracker.web.security.NoOpAuthenticationManager"
+		id="noOpAuthenticationManager">
 	</bean>
 
-	<bean id="userDetailsService" class="com.maqs.moneytracker.security.CustomUserDetailsService" />
+	<bean class="com.maqs.moneytracker.web.security.NoOpAuthenticationProvider"
+		id="noOpAuthenticationProvider">
+	</bean>
 
-	<bean id="restAuthenticationFilter"
-		class="com.maqs.moneytracker.web.security.CustomTokenAuthenticationFilter">
+	<bean
+		class="com.maqs.moneytracker.web.security.CustomTokenAuthenticationFilter"
+		id="authenticationTokenProcessingFilter">
 		<constructor-arg type="java.lang.String">
 			<value>/api/**</value>
 		</constructor-arg>
-		<property name="authenticationManager" ref="noOpAuthenticationManager" />
-		<property name="authenticationSuccessHandler" ref="authSuccessHandler" />
-		<property name="authenticationFailureHandler" ref="authFailureHandler" />
 	</bean>
 
-	<!-- Enable the annotations for defining the secure role -->
-	<security:global-method-security
-		secured-annotations="enabled" />
-
-	<security:http realm="Protected API" use-expressions="true"
-		auto-config="false" create-session="stateless" entry-point-ref="httpAuthenticationEntryPoint"
-		authentication-manager-ref="authenticationManager">
-		<security:intercept-url pattern="/user/token"
-			access="permitAll" />
-		<security:custom-filter ref="restAuthenticationFilter"
-			position="FORM_LOGIN_FILTER" />
-		<security:intercept-url pattern="/api/**"
-			access="isAuthenticated()" />
-		<security:intercept-url pattern="/api/**" access="permitAll" method="OPTIONS"/>
-		<security:custom-filter position="LOGOUT_FILTER"
-			ref="logoutFilter" />
-	</security:http>
-
-	<bean id="sif"
-		class="org.springframework.security.web.context.SecurityContextPersistenceFilter" />
-
-	<bean id="securityContextLogoutHandler"
-		class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
-
-	<bean id="logoutFilter"
-		class="org.springframework.security.web.authentication.logout.LogoutFilter">
-		<property name="filterProcessesUrl" value="/logout" />
-		<constructor-arg index="0">
-			<ref bean="httpLogoutSuccessHandler" />
-		</constructor-arg>
-		<constructor-arg index="1">
-			<list>
-				<ref bean="securityContextLogoutHandler" />
-			</list>
-		</constructor-arg>
-	</bean>
-
-	<security:authentication-manager alias="authenticationManager">
-		<security:authentication-provider
-			ref="daoAuthenticationProvider">
-
-		</security:authentication-provider>
-	</security:authentication-manager>
-
-	<bean id="daoAuthenticationProvider"
-		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-		<property name="userDetailsService" ref="userDetailsService" />
-	</bean>
-
-	<security:authentication-manager alias="noOpAuthenticationManager">
-		<security:authentication-provider
-			ref="noOpAuthenticationProvider">
-		</security:authentication-provider>
-	</security:authentication-manager>
-	
-	<bean id="noOpAuthenticationProvider" class="com.maqs.moneytracker.web.security.NoOpAuthenticationProvider" />
-	
-	<bean id="securityContextHolderAwareRequestFilter"
-		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
-
+	<!-- <bean id="securityContextLogoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" 
+		/> <bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter"> 
+		<property name="filterProcessesUrl" value="/logout" /> <constructor-arg index="0"> 
+		<ref bean="httpLogoutSuccessHandler" /> </constructor-arg> <constructor-arg 
+		index="1"> <list> <ref bean="securityContextLogoutHandler" /> </list> </constructor-arg> 
+		</bean> -->
 
 </beans>

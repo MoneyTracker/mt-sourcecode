@@ -1,17 +1,15 @@
 package com.maqs.moneytracker.security;
 
-import java.util.Collection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.maqs.moneytracker.common.Constansts;
-import com.maqs.moneytracker.common.service.exception.ServiceException;
+import com.maqs.moneytracker.common.util.CollectionsUtil;
 
-public class CustomAuthenticationToken implements Authentication {
+public class CustomAuthenticationToken extends AbstractAuthenticationToken implements Authentication {
     
     /**
 	 * 
@@ -19,71 +17,28 @@ public class CustomAuthenticationToken implements Authentication {
 	private static final long serialVersionUID = -8482729479409817604L;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	private String username;
-	
-	private Object principal;
     
-    private Object details;    
-    
-    private final TokenManager tokenManager;
-    
-    private Collection<GrantedAuthority> authorities;
-    
-    private boolean authenticated;
-    
-    public CustomAuthenticationToken(String token, TokenManager tokenManager) throws ServiceException {
-    	this.tokenManager = tokenManager;
-        populateDetails(token);        
-    }
- 
-    @SuppressWarnings("unchecked")
-	private void populateDetails(String token) throws ServiceException {
-    	if (tokenManager.valid(token)) {
-    		MyUserDetails userDetails = (MyUserDetails) tokenManager
-    				.getUserFromToken(token);
-    		details = userDetails;
-    		principal = userDetails;
-    		username = userDetails.getUsername();
-    		authorities = (Collection<GrantedAuthority>) userDetails.getAuthorities();
-    		logger.debug("populateDetails: " +  userDetails);
-    	} else {
-    		throw new AuthenticationServiceException("Either your token is invalid or it is expired, please login again");
-    	}
+    public CustomAuthenticationToken(UserDetails userDetails) {
+		super(userDetails.getAuthorities());
+		setDetails(userDetails);
+		logger.debug("the authentication is created for : " + userDetails);
+		if (CollectionsUtil.isNonEmpty(userDetails.getAuthorities())) {
+			super.setAuthenticated(true); // must use super, as we override
+		}
 	}
-
+	
 	@Override
     public Object getCredentials() {
         return Constansts.EMPTY_STRING;
     }
- 
-	@Override
-	public Collection<GrantedAuthority> getAuthorities() {
-		return authorities;
-	}
-	
+ 	
     @Override
     public Object getPrincipal() {
-        return principal;
+    	UserDetails userDetails = (UserDetails) getDetails();
+		if (userDetails != null) {
+			return userDetails.getUsername();
+		}
+        return userDetails;
     }
     
-    @Override
-    public Object getDetails() {
-    	return details;
-    }
-
-	@Override
-	public String getName() {
-		return username;
-	}
-
-	@Override
-	public boolean isAuthenticated() {
-		return authenticated;
-	}
-
-	@Override
-	public void setAuthenticated(boolean authenticated) throws IllegalArgumentException {
-		this.authenticated = authenticated;
-	}
 }

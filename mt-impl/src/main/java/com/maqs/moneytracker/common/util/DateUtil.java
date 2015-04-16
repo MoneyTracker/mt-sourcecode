@@ -13,6 +13,8 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,15 +31,15 @@ public final class DateUtil {
 
 	private static Logger logger = LoggerFactory.getLogger(DateUtil.class);
 
-	public static final String DEFAULT_FORMAT = "dd-MMM-yyyy";
+	public static final String DEFAULT_FORMAT = "yyyy-MMM-dd";
 
-	private static final SimpleDateFormat dateFormatterWithoutTime = new SimpleDateFormat(
-			DEFAULT_FORMAT);
+	private static final DateTimeFormatter dateFormatterWithoutTime = DateTimeFormat
+			.forPattern(DEFAULT_FORMAT);
 
-	public static final String MONTH_FORMAT = "MMM-yyyy";
+	public static final String MONTH_FORMAT = "MMM-yy";
 
-	private static final SimpleDateFormat dateFormatterMonthYear = new SimpleDateFormat(
-			MONTH_FORMAT);
+	private static final DateTimeFormatter dateFormatterMonthYear = DateTimeFormat
+			.forPattern(MONTH_FORMAT);
 
 	private static final String HYPHEN = "-";
 
@@ -71,7 +73,7 @@ public final class DateUtil {
 	}
 
 	public static String getMonthYear(Date d) {
-		return dateFormatterMonthYear.format(d);
+		return dateFormatterMonthYear.print(d.getTime());
 	}
 
 	public static XMLGregorianCalendar toXMLGregorianCalendar(Date date) {
@@ -87,39 +89,34 @@ public final class DateUtil {
 		}
 	}
 
-	public static Date getDateWithoutTime(Date date)  {
+	public static Date getDateWithoutTime(Date date) {
 		Date dateWithoutTime = null;
-		try {
-			dateWithoutTime = dateFormatterWithoutTime
-					.parse(getDateStringWithoutTime(date));
-		} catch (ParseException e) {
-			throw new IllegalArgumentException(e.getMessage());
-		}
+		DateTime d = dateFormatterWithoutTime
+				.parseDateTime(getDateStringWithoutTime(date));
+		dateWithoutTime = d.toDate();
+
 		return dateWithoutTime;
 	}
 
 	public static String getDateStringWithoutTime(Date date) {
-		return dateFormatterWithoutTime.format(date);
+		return dateFormatterWithoutTime.print(date.getTime());
 	}
 
-	public static SimpleDateFormat getDateFormatterWithoutTime() {
+	public static DateTimeFormatter getDateFormatterWithoutTime() {
 		return dateFormatterWithoutTime;
 	}
 
-	public static SimpleDateFormat getDefaultDateFormatter() {
+	public static DateTimeFormatter getDefaultDateFormatter() {
 		return dateFormatterWithoutTime;
 	}
 
 	public static Date getDate(String text) throws ParseException {
-		SimpleDateFormat sdf = getDefaultDateFormatter();
-		synchronized (sdf) {
-			Date dateWithoutTime = sdf.parse(text);
-			return dateWithoutTime;
-		}
+		DateTimeFormatter sdf = getDefaultDateFormatter();
+		DateTime dateWithoutTime = sdf.parseDateTime(text);
+		return dateWithoutTime.toDate();
 	}
 
-	public static String getDateAsString(String text, String dateformat)
-			 {
+	public static String getDateAsString(String text, String dateformat) {
 		// create SimpleDateFormat object with source string date format
 		SimpleDateFormat sdfSource = new SimpleDateFormat(dateformat);
 
@@ -132,7 +129,7 @@ public final class DateUtil {
 		}
 
 		// parse the date into another format
-		return dateFormatterWithoutTime.format(date);
+		return dateFormatterWithoutTime.print(date.getTime());
 	}
 
 	public static Date getDate(String value, String dateFormat)
@@ -283,11 +280,17 @@ public final class DateUtil {
 		return range;
 	}
 
-	public static String getFormattedDate(Date date) {
-		return dateFormatterWithoutTime.format(date);
+	public static void main(String[] args) {
+		Date[] range = getHistoricalReportRange();
+		logger.debug("after from : " + range[0] + " to: " + range[1]);
+		System.out.println(getDateAsString("04-Nov-2014", DEFAULT_FORMAT));
 	}
 
-	public static DateFormat getFormat() {
+	public static String getFormattedDate(Date date) {
+		return dateFormatterWithoutTime.print(date.getTime());
+	}
+
+	public static DateTimeFormatter getFormat() {
 		return dateFormatterWithoutTime;
 	}
 

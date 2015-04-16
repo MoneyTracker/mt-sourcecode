@@ -35,6 +35,7 @@ import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.DateUtil;
 import com.maqs.moneytracker.common.util.ExcelProcessor;
 import com.maqs.moneytracker.common.util.StringUtil;
+import com.maqs.moneytracker.common.util.Util;
 import com.maqs.moneytracker.model.BankStatement;
 import com.maqs.moneytracker.model.ColumnMap;
 import com.maqs.moneytracker.model.DataField;
@@ -158,7 +159,7 @@ public class ImportServiceImpl implements ImportService {
 						for (DataField dataField : fields) {
 							int actionIndex = dataField.getAction()
 									.getActionIndex();
-							if (Action.CREATE_NEW == actionIndex) {								
+							if (Action.CREATE_NEW == actionIndex) {
 								dataField.setUserId(userId);
 							}
 							dataField.setDataMapId(dataMap.getId());
@@ -347,11 +348,8 @@ public class ImportServiceImpl implements ImportService {
 				String fileName = null;
 				fileName = file.getOriginalFilename();
 				byte[] bytes = file.getBytes();
-				String userHome = System.getProperty("user.home");
-				if (userHome == null) {
-					userHome = File.separator;
-				}
-				f = new File(userHome + File.separator + fileName);
+				String tmpdir = Util.getTempDirectory();
+				f = new File(tmpdir + File.separator + fileName);
 				buffStream = new BufferedOutputStream(new FileOutputStream(f));
 				buffStream.write(bytes);
 				logger.debug("file is uploaded at " + f.getAbsolutePath());

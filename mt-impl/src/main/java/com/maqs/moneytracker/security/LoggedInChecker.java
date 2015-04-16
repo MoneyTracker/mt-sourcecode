@@ -21,14 +21,14 @@ public class LoggedInChecker {
 		User user = null;
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
+		logger.debug("getLoggedInUser(): " + authentication);
 		if (authentication != null) {
-			Object principal = authentication.getPrincipal();
-			if (principal instanceof MyUserDetails) {
-				MyUserDetails userDetails = (MyUserDetails) principal;
+			Object details = authentication.getDetails();
+			if (details instanceof MyUserDetails) {
+				MyUserDetails userDetails = (MyUserDetails) details;
 				user = userDetails.getUser();
 			}
 		}
-		logger.debug("getLoggedInUser(): " + user.getName());
 		return user;
 	}
 
@@ -42,8 +42,9 @@ public class LoggedInChecker {
 		}
 		return u.getId();
 	}
-	
-	public QuerySpec getQuerySpec(Class<? extends BaseEntity> clazz) throws ServiceException {
+
+	public QuerySpec getQuerySpec(Class<? extends BaseEntity> clazz)
+			throws ServiceException {
 		QuerySpec querySpec = new QuerySpec(clazz.getName());
 		Long userId = getCurrentUserId();
 		querySpec.addPropertySpec(new PropertySpec(Constansts.USER_ID, userId));
