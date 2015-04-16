@@ -33,7 +33,8 @@
     "angular-hotkeys": "chieffancypants/angular-hotkeys#~1.4.5",
     "ngDialog": "~0.3.9",
     "ng-busy": "~0.2.0",
-    "angular-progress-arc": "~1.0.0"
+    "angular-progress-arc": "~1.0.0",
+    "angular-dialog-service": "5.2.6"
   },
   "devDependencies": {
     "angular-mocks": "1.2.15",

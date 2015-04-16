@@ -529,20 +529,12 @@ hr {
 .green {
   color: #08820D !important;
 }
-@media screen and (max-width: 500px) {
+@media (max-width: 500px) {
   .table {
     overflow-x: auto;
     display: block;
+    width: 800px;
   }
-}
-@media screen and (min-width: 501px) {
-  .table {
-  }
-}
-@media screen and (max-width: 368px) {
-    img.smallResolution{
-        min-height: 150px;
-    }
 }
 .table {
 	border: 1px solid #ddd;
@@ -899,10 +891,6 @@ border-top: 1px solid #ddd;
 :required {
   background: #fff url('../images/required.png') no-repeat 100% 0;
 }
-/*.ng-dirty.ng-valid{
-  border: 1px solid #55B05A !important;
-  background: url('../images/valid.png') no-repeat 100% 0;
-}*/
 .error-messages.ng-active {
   background:maroon;
   color:white;

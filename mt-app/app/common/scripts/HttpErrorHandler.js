@@ -1,8 +1,5 @@
 var errorHandler = new angular.module('http-error-handling', [])
-.config(function($provide, $httpProvider, $compileProvider) {
-    var elementsList = $();
-
-    var interceptor = ['$q', '$cacheFactory', '$timeout', '$rootScope', function ($q, $cacheFactory, $timeout, $rootScope) {
+.config(['$provide', '$httpProvider', '$compileProvider',function($provide, $httpProvider, $compileProvider) {    var interceptor = ['$q', '$cacheFactory', '$timeout', '$rootScope', function ($q, $cacheFactory, $timeout, $rootScope) {
 
       function setComplete() {
 
@@ -91,4 +88,4 @@ var errorHandler = new angular.module('http-error-handling', [])
     }];
 
     $httpProvider.interceptors.push(interceptor);
-});
+}]);
