@@ -10,12 +10,13 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.ValidationException;
 import com.maqs.moneytracker.common.paging.Page;
+import com.maqs.moneytracker.common.paging.list.PageableList;
 import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.OrderBySpec;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
@@ -27,8 +28,9 @@ import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.Util;
 import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
+import com.maqs.moneytracker.model.BaseEntity;
 import com.maqs.moneytracker.model.Category;
-import com.maqs.moneytracker.model.Transaction;
+import com.maqs.moneytracker.model.User;
 import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
@@ -50,6 +52,9 @@ public class DomainServiceImpl implements DomainService {
 	private Map<Long, Category> categoriesCacheMap;
 	
 	private Map<Long, Account> accountsCacheMap;
+	
+	@Autowired
+	private UserService userService;
 	
 	public DomainServiceImpl() {
 		this(null);
@@ -319,7 +324,7 @@ public class DomainServiceImpl implements DomainService {
 	}
 	
 	@Override
-	public List<Category> listCategoryTree(DomainSearchDto dto)
+	public PageableList<Category> listCategoryTree(DomainSearchDto dto)
 			throws ServiceException {
 		if (dto == null) {
 			throw new IllegalArgumentException("dto is null...");
@@ -341,7 +346,7 @@ public class DomainServiceImpl implements DomainService {
 		}
 		Page page = dto.getPage();
 		List<? extends Entity> entities = list(querySpec, page);
-		List<Category> parentCategories = (List<Category>) entities;
+		PageableList<Category> parentCategories = (PageableList<Category>) entities;
 		if (CollectionsUtil.isNullOrEmpty(parentCategories)) {
 			return null;
 		}	
@@ -355,7 +360,8 @@ public class DomainServiceImpl implements DomainService {
 		List<Category> categories = new ArrayList<Category>();
 		categories.addAll(parentCategories);
 		categories.addAll(childCategories);
-		return prepareCategoryTree(categories);
+		prepareCategoryTree(categories);
+		return parentCategories;
 	}
 
 	private List<Category> prepareCategoryTree(List<Category> categories) {
@@ -446,6 +452,9 @@ public class DomainServiceImpl implements DomainService {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<Long, Entity> fetchCategoryMap(Set<Long> ids) throws ServiceException {
 		DomainSearchDto dto = new DomainSearchDto();
@@ -455,4 +464,75 @@ public class DomainServiceImpl implements DomainService {
 				.getMap(categories);
 		return map;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageableList<Category> listSystemCategoryTree(Page page)
+			throws ServiceException {
+		User systemUser = userService.getSystemUser();
+		if (systemUser == null) {
+			throw new ServiceException("no system user found");
+		}
+		QuerySpec querySpec = new QuerySpec(Category.class.getName());
+		querySpec.addPropertySpec(new PropertySpec(Constants.USER_ID, systemUser.getId()));
+		querySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, Operation.ISNULL, null));
+		PageableList<Category> parentCategories = (PageableList<Category>) list(querySpec, page);
+		if (CollectionsUtil.isNullOrEmpty(parentCategories)) {
+			return null;
+		}	
+		Set<Long> parentCatIds = new HashSet<Long>();
+		for (Category parent : parentCategories) {
+			Long parentCatId = parent.getId();
+			parentCatIds.add(parentCatId);
+		}
+		QuerySpec childrenQuerySpec = new QuerySpec(Category.class.getName());
+		childrenQuerySpec.addPropertySpec(new PropertySpec(Constants.USER_ID, systemUser.getId()));
+		childrenQuerySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, Operation.IN, parentCatIds));
+		List<Category> childCategories = (List<Category>) list(childrenQuerySpec, null);
+		
+		List<Category> categories = new ArrayList<Category>();
+		categories.addAll(parentCategories);
+		categories.addAll(childCategories);
+		prepareCategoryTree(categories);
+		
+		return parentCategories;
+	}
+
+	@Override
+	public PageableList<Category> listCategories(QuerySpec querySpec, Page page)
+			throws ServiceException {
+		PageableList<Category> parentCategories = (PageableList<Category>) list(querySpec, page);
+		if (CollectionsUtil.isNullOrEmpty(parentCategories)) {
+			return null;
+		}	
+		Set<Long> parentCatIds = new HashSet<Long>();
+		for (Category parent : parentCategories) {
+			Long parentCatId = parent.getId();
+			parentCatIds.add(parentCatId);
+		}
+		DomainSearchDto dto = new DomainSearchDto();
+		dto.setCategoryIds(new ArrayList<Long>(parentCatIds));
+		List<Category> childCategories = listChildCategories(dto);
+		List<Category> categories = new ArrayList<Category>();
+		categories.addAll(parentCategories);
+		categories.addAll(childCategories);
+		prepareCategoryTree(categories);
+		
+		return parentCategories;
+	}
+	
+	@Override
+	public long totalCount(Class<? extends BaseEntity> clazz) throws ServiceException {
+		long count = 0;
+		try {
+			QuerySpec querySpec = loggedInChecker.getQuerySpec(clazz);
+			count = dao.count(querySpec);	
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+		return count;
+	}
+	
 }

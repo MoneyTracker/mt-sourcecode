@@ -17,4 +17,5 @@ public interface UserService {
 
 	boolean register(User user) throws ServiceException;
     
+	public User getSystemUser() throws ServiceException;
 }

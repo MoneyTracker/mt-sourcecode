@@ -8,7 +8,7 @@ angular.module('mt-app')
     $scope.today = new Date();
     $scope.transactions = [];
     $scope.selectedTransactions = [];
-    $scope.toBeStoredList = [];
+    $scope.storeList = [];
 
     $scope.allSelected = false;
     $scope.contentAreaHeight = $rootScope.contentPanelHeight;
@@ -138,7 +138,7 @@ angular.module('mt-app')
     };
     $scope.saveAll = function() {
         console.info("saveAll");
-        var list = $scope.toBeStoredList;
+        var list = $scope.storeList;
         if (!list || list.length == 0) {
             return;
         }
@@ -156,18 +156,23 @@ angular.module('mt-app')
         var promise = TransactionService.storeTransactions(list);
         promise.then(
             function (data) {
-                for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i < $scope.storeList.length; i++) {
                     var t = data[i];
-                    var index = indexes[i];                    
-                    if (t.message) {
-                        t.$$selected = true;
-                        t.$$edit = true;
+                    var index = indexes[i];
+                    console.info("index: " + index + " " + t.description);                    
+                    if (t.messageType == 'success') {
+                        $scope.storeList.splice(i, 1);
+                        indexes.splice(i, 1);
+                        data.splice(i, 1);
+                        i--;
                     } else {
-                        $scope.toBeStoredList.splice(index, 1);
+                        t.$$edit = true;
+                        $scope.storeList[i] = t;
+                        t.action.actionIndex = ACTION_INDEX.NEW;
                     }
                     $scope.transactions[index] = t;
-                };
-                console.info(data.message + " " + data.$$edit);
+                };                
+                console.info("$scope.storeList: " + $scope.storeList.length);
             },
             function (reason) {
                 t.$$edit = true;
@@ -249,7 +254,7 @@ angular.module('mt-app')
         );
     };
     $scope.search = function() {
-        $scope.toBeStoredList = [];
+        $scope.storeList = [];
         $scope.tableParams.page(0);
         $scope.tableParams.reload();
     };
@@ -340,8 +345,8 @@ angular.module('mt-app')
         var page = $scope.searchDto.page;
         console.dir(page);
         if (page != undefined) {
-            $scope.totalItems = page.totalRecords;
-            $scope.itemsPerPage=page.pageSize;
+            $scope.totalitemNames = page.totalRecords;
+            $scope.itemNamesPerPage=page.pageSize;
             $scope.numPages = Math.round(page.totalRecords / page.pageSize);
         }
     });
@@ -395,12 +400,12 @@ angular.module('mt-app')
         }
         $scope.transactions.unshift($scope.inserted);
         $scope.inserted.$$edit = true;
-        $scope.toBeStoredList.push($scope.inserted);
+        $scope.storeList.push($scope.inserted);
     };
     $scope.addToCurrentMonth = function() {
         var list = $scope.selectedTransactions;
         for (var i = 0; i < list.length; i++) {
-            var t = list[i];
+            var t = angular.copy(list[i]);
             var onDate = ApplicationService.updateCurrentMonth(t.onDate);
             t.onDate = onDate; 
             $scope.duplicate(t);
@@ -412,21 +417,7 @@ angular.module('mt-app')
             $scope.duplicate(list[i]);
         }
     };
-    $scope.duplicate = function(t) {
-        console.info(t);
-        if (t != undefined) {
-            var t = angular.copy(t);
-            t.$$selected = false;
-            t.id = null;
-            t.action.actionIndex = ACTION_INDEX.NEW;
-            t.$$edit = true;
-            if ($scope.previousTranDate != undefined) {
-                t.onDate = $scope.previousTranDate;
-            }
-            $scope.transactions.unshift(t);
-            $scope.toBeStoredList.push(t);
-        }
-    };
+    
     $scope.deleteAll = function() {
         var list = $scope.selectedTransactions;
         if (list) {
@@ -445,7 +436,19 @@ angular.module('mt-app')
                 console.info("declined ...");
             };
             var msg = list.length <= 1 ? "this transaction" : "these transactions";
-            var data = ApplicationService.getDeleteData(msg);
+            var itemNames = "";
+            for (var i = 0; i < list.length; i++) {
+                var t = list[i];
+                var text = t.description;
+                if (! text) {
+                    text = t.category.name;
+                }
+                itemNames += text;
+                if (i < list.length - 1) {
+                    itemNames += ", ";
+                }
+            };
+            var data = ApplicationService.getDeleteData(msg, itemNames);
             console.dir(data);
             ApplicationService.confirm(data, confirmedCallback, declinedCallback);
         }
@@ -477,15 +480,35 @@ angular.module('mt-app')
         console.info("dateChanged");
         $scope.tranChanged(t);
     };
-    $scope.tranChanged = function(t) {
-        var index = $scope.toBeStoredList.indexOf(t);
-        if (index < 0) {
-            console.info("added " + t.description);
-            $scope.toBeStoredList.push(t);
+    $scope.duplicate = function(t) {
+        if (t != undefined) {
+            var t = angular.copy(t);
+            t.action.actionIndex = ACTION_INDEX.NEW;
+            t.$$selected = false;
+            t.id = null;
+            t.$$edit = true;
+            /*if ($scope.previousTranDate != undefined) {
+                t.onDate = $scope.previousTranDate;
+            }*/
+            if( $scope.storeList.indexOf(t) == -1) {
+              $scope.storeList.push(t);  
+            }
+            console.info("duplicate");
+            console.dir(t);
+            $scope.transactions.unshift(t);
         }
+    };
+    $scope.tranChanged = function(t) {
+        var index = $scope.storeList.indexOf(t);
+        if (index != -1) {
+            console.info("tranChanged " + t.description + " index " + index + " " + t.action.actionIndex) ;
+            $scope.storeList[index] = t;
+        } 
         if (t.action.actionIndex != ACTION_INDEX.NEW) {
             t.action.actionIndex = ACTION_INDEX.UPDATE;
         }
+        console.info("tranChanged " + t.description + " " + t.action.actionIndex) ;
+        
     };
     $scope.categoryChanged = function(t) {
         console.info("cat changed");
@@ -513,8 +536,11 @@ angular.module('mt-app')
         }
     };
     $scope.edit = function(t) {
-        $scope.original = angular.copy(t);
         t.$$edit = true;
+        var index = $scope.storeList.indexOf(t);
+        if (index == -1) {
+            $scope.storeList.push(t);
+        } 
     };
     $scope.cancel = function() {
         // t.$$edit = false;
@@ -530,7 +556,7 @@ angular.module('mt-app')
             list[i].$$selected = false;
             list[i].$$edit = false;
         };*/
-        $scope.toBeStoredList = [];
+        $scope.storeList = [];
         $scope.selectedTransactions = [];
         $scope.tableParams.reload();
     };

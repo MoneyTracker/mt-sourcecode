@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('mt-app')
-    .controller('DomainController', ['$rootScope', '$scope', '$state', '$filter', '$window', 'ngTableParams','ApplicationService', 'DomainService','ACTION_INDEX',
-    function ($rootScope, $scope, $state, $filter, $window, ngTableParams, ApplicationService, DomainService, ACTION_INDEX) {
+    .controller('DomainController', ['$rootScope', 'dialogs', '$scope', '$state', '$filter', '$window', 'ngTableParams','ApplicationService', 'DomainService','ACTION_INDEX',
+    function ($rootScope, dialogs, $scope, $state, $filter, $window, ngTableParams, ApplicationService, DomainService, ACTION_INDEX) {
     console.info("DomainController");
     $scope.categoryTree = [];
     $scope.$types = [{code: 'E', name: 'Expense', typeClass: 'expTexture'},
@@ -112,17 +112,28 @@ angular.module('mt-app')
               }
               var promise = DomainService.listCategoryTree($scope.searchDto);
               promise.then(
-                  function (data) {
+                  function (responseData) {
                     $scope.categoriesInitialized = true;
-                    if (data) {
-                      $scope.categoryTree = data;  
+                    console.dir(responseData);
+                    if (responseData) {
+                        $scope.categoryTree = responseData.contentList;
+                        if (responseData.page != null) {
+                            $scope.searchDto.page.totalRecords = responseData.page.totalRecords;
+                            $scope.catTableParams.total($scope.searchDto.page.totalRecords);
+                        } else {
+                          $scope.categoryTree = [];
+                          $scope.catTableParams.total(0);
+                        }
+                    } else {
+                      $scope.categoryTree = [];
+                      $scope.catTableParams.total(0);
                     }
+                    $defer.resolve($scope.categoryTree);
                   },
                   function (reason) {
                       console.log('Failed: ' + reason);
                   }
               );
-              $defer.resolve($scope.categoryTree);
           }
       });
     };
@@ -255,7 +266,8 @@ angular.module('mt-app')
           var declinedCallback = function() {
               console.info("declined ...");
           };
-          var data = ApplicationService.getDeleteData(a.name);
+          var msg = a.name + " Account";
+          var data = ApplicationService.getDeleteData(msg);
           console.dir(data);
           ApplicationService.confirm(data, confirmedCallback, declinedCallback);
         }
@@ -318,16 +330,35 @@ angular.module('mt-app')
         $scope.originalCategory = angular.copy(c);
         c.$$edit = true;
     };
-    $scope.cancelCategory = function(c) {
-        c.$$edit = false;
-        var index = $scope.categoryTree.indexOf(c);
-        if (c.id) {
-          $scope.resetCategory(c, $scope.originalCategory);
-        } else {
-          $scope.categoryTree.splice(index, 1);
+    $scope.deleteCategory = function(c) {
+        if (c && c.id) {
+          var confirmedCallback = function() {
+              console.info("deleting category...");
+              var promise = DomainService.deleteCategory(c.id);
+              promise.then(
+                  function (data) {
+                    $scope.removeCategoryFromTable(c);
+                  },
+                  function (reason) {
+                      console.log('Failed: ' + reason);
+                  }
+              );
+          };
+          var declinedCallback = function() {
+              console.info("declined ...");
+          };
+          var msg = c.name + " Category";
+          var data = ApplicationService.getDeleteData(msg);
+          console.dir(data);
+          ApplicationService.confirm(data, confirmedCallback, declinedCallback);
         }
     };
-    $scope.resetCategory=function(c, withCat) {
+    $scope.cancelCategory = function(c) {
+        console.dir(c);
+        c.$$edit = false;
+        $scope.resetCategory(c, $scope.originalCategory);
+    };
+    $scope.removeCategoryFromTable=function(c) {
       var parentId = c.parentCategoryId;
       var index = -1;
       if (parentId) {
@@ -335,18 +366,48 @@ angular.module('mt-app')
         var parent = selected[0];
         if (parent) {
           index = parent.children.indexOf(c);
-          parent.children[index] = withCat;
+          parent.children.splice(index, 1);
+          console.info("parent.children " + parent.children.length);
         }
       } else {
         index = $scope.categoryTree.indexOf(c);
-        $scope.categoryTree[index] = withCat;
-      }
-      withCat = null;
-    };
-    $scope.removeCategoryFromTable=function(c) {
-      var index = $scope.categoryTree.indexOf(c);
-      if (index > -1) {
         $scope.categoryTree.splice(index, 1);
       }
+    };
+    $scope.resetCategory=function(c, withCat) {      
+      var parentId = c.parentCategoryId;
+      var index = -1;
+      if (parentId) {
+        var selected = $filter('filter')($scope.categoryTree, {id: parentId});
+        var parent = selected[0];
+        if (parent) {
+          index = parent.children.indexOf(c);
+          if (c.id) {
+            parent.children[index] = withCat;
+          } else {
+            parent.children.splice(index, 1);
+          }
+        }
+      } else {
+        index = $scope.categoryTree.indexOf(c);
+        if (c.id) {
+          $scope.categoryTree[index] = withCat;
+        } else {
+          $scope.categoryTree.splice(index, 1);
+        }
+      }
+      //withCat = undefined;
+    };
+    $scope.showSystemCategories = function() {
+      var data = {};
+      var dlg = dialogs.create('modules/domain/system-categories-dialog.html',
+          'SystemCategoryController',data,
+          'lg');
+      dlg.result.then(function(data){
+          console.info("save");
+          console.dir(data);
+      },function(){
+          console.info("cancel");
+      });
     };
 }]);

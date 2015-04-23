@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.maqs.moneytracker.common.paging.Page;
+import com.maqs.moneytracker.common.paging.list.PageContent;
+import com.maqs.moneytracker.common.paging.list.PageableList;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
 import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
@@ -95,19 +98,20 @@ public class DomainController {
 	 */
 	@RequestMapping(value="/categorytree", method = RequestMethod.POST)
 	public @ResponseBody
-	List<Category> listCategoryTree(@RequestBody DomainSearchDto dto)
+	PageContent<Category> listCategoryTree(@RequestBody DomainSearchDto dto)
 			throws ServiceException {
 		if (logger.isDebugEnabled())
 			logger.debug("listCategoryTree method is been called");
 		
-		List<Category> categories = domainService.listCategoryTree(dto);
+		PageableList<Category> categories = domainService.listCategoryTree(dto);
 		if (logger.isInfoEnabled())
 			logger.info("listCategoryTree() has listed "
 					+ (categories == null ? 0 : categories.size()) + " records");
 
-		return categories;
+		PageContent<Category> pageContent = new PageContent<Category>(categories, categories.getPage());
+		return pageContent;
 	}
-	
+		
 	@RequestMapping(value="/periods", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Period> listPeriod()
@@ -175,5 +179,29 @@ public class DomainController {
 		if (logger.isDebugEnabled())
 			logger.debug("deleteAccount method is been called");
 		return domainService.deleteCategory(id);
+	}
+	
+	/**
+	 * Lists the Categories by given search criteria.
+	 * 
+	 * @param page
+	 *            current page
+	 * @return List of Project Dtos
+	 * @throws ServiceException
+	 */
+	@RequestMapping(value="/systemcategories", method = RequestMethod.POST)
+	public @ResponseBody
+	PageContent<Category> importSystemCategoryTree(@RequestBody Page page)
+			throws ServiceException {
+		if (logger.isDebugEnabled())
+			logger.debug("listCategoryTree method is been called");
+		
+		PageableList<Category> categories = domainService.listSystemCategoryTree(page);
+		if (logger.isInfoEnabled())
+			logger.info("importSystemCategoryTree() has listed "
+					+ (categories == null ? 0 : categories.size()) + " records");
+
+		PageContent<Category> pageContent = new PageContent<Category>(categories, categories.getPage());
+		return pageContent;
 	}
 }

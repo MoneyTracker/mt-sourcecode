@@ -12,8 +12,7 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 	
 	<context:property-placeholder
-		location="classpath:com/maqs/moneytracker/services/coreservices.properties,
-		classpath:com/maqs/moneytracker/services/conf/hibernate.properties,
+		location="classpath:com/maqs/moneytracker/services/conf/hibernate.properties,
 		file:${mt_home}/config/settings.properties" />
 	
 	<context:component-scan base-package="com.maqs.moneytracker.services,com.maqs.moneytracker.security" />
@@ -28,7 +27,7 @@
 		<property name="targetMethod" value="configure" />
 		<property name="arguments">
 			<list>
-				<value>${log4j.properties.path}</value>
+				<value>${mt_home}/log4j.properties</value>
 			</list>
 		</property>
 	</bean>

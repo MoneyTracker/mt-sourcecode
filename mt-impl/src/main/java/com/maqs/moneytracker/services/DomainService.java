@@ -5,10 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.maqs.moneytracker.common.paging.Page;
+import com.maqs.moneytracker.common.paging.list.PageableList;
+import com.maqs.moneytracker.common.paging.spec.QuerySpec;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
 import com.maqs.moneytracker.common.transferobjects.Entity;
 import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
+import com.maqs.moneytracker.model.BaseEntity;
 import com.maqs.moneytracker.model.Category;
 import com.maqs.moneytracker.types.AccountType;
 import com.maqs.moneytracker.types.TransactionType;
@@ -49,7 +52,7 @@ public interface DomainService {
 
 	public Category getCategoryById(Long catId) throws ServiceException;
 
-	public List<Category> listCategoryTree(DomainSearchDto dto) throws ServiceException;
+	public PageableList<Category> listCategoryTree(DomainSearchDto dto) throws ServiceException;
 	
 	public List<Category> listParentCategories(DomainSearchDto dto) throws ServiceException;
 
@@ -60,4 +63,12 @@ public interface DomainService {
 	public boolean deleteCategory(Long id) throws ServiceException;
 	
 	public Map<Long, Entity> fetchCategoryMap(Set<Long> ids) throws ServiceException;
+
+	public PageableList<Category> listSystemCategoryTree(Page page) throws ServiceException;
+	
+	public PageableList<Category> listCategories(QuerySpec querySpec, Page page)
+			throws ServiceException;
+	
+	public long totalCount(Class<? extends BaseEntity> clazz) throws ServiceException;
+	
 }

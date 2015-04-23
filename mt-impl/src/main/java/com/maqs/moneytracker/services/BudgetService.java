@@ -27,4 +27,5 @@ public interface BudgetService {
 			throws ServiceException;
 
 	public BigDecimal getTotalBudgeted(BudgetSearchDto searchDto) throws ServiceException;
+	
 }

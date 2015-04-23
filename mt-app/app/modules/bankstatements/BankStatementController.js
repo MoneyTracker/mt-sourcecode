@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('mt-app')
-    .controller('BankStatementController', ['$rootScope', '$filter', '$scope', 'hotkeys', '$window', 
+    .controller('BankStatementController', ['$timeout','$rootScope', '$filter', '$scope', 'hotkeys', '$window', 
         'BankStatementService','DomainService', 'ngTableParams', 'TransactionService', 'ACTION_INDEX',
-    function ($rootScope, $filter, $scope, $hotkeys, $window, BankStatementService, DomainService, ngTableParams, TransactionService, ACTION_INDEX) {
+    function ($timeout, $rootScope, $filter, $scope, $hotkeys, $window, BankStatementService, DomainService, ngTableParams, TransactionService, ACTION_INDEX) {
     console.info("BankStatementController ");
     $scope.newBankStatement = { 'name': '', 'dateFormat': 'dd/MM/yy', 
     'action': {'actionIndex' : 1} };
@@ -15,6 +15,7 @@ angular.module('mt-app')
     'action': {'actionIndex' : 1} };
     $scope.transactions = [];
     $scope.importedList = [];
+    $scope.imported = false;
     $scope.selectedTransactions = [];
 
     $scope.allSelected = false;
@@ -61,20 +62,24 @@ angular.module('mt-app')
                 var orderedData = params.sorting() ?
                                     $filter('orderBy')(filteredData, params.orderBy()) :
                                     filteredData;
+
                 var slicedData = orderedData.slice((page - 1) * count, page * count);
-                console.info("slicedData");                    
+                console.info("slicedData " + ((page - 1) * count) + " " + page  * count);                    
                 console.dir(slicedData);
                 $scope.transactions = slicedData;
+                $scope.allSelected = false;
                 $defer.resolve($scope.transactions);
             }
         });
         $scope.importTableParams.settings().$scope = $scope;
-        $scope.loadBankStatements();
+        
         $scope.loadCategories();
         $scope.loadAccounts();
+        
         $scope.loadExcelColumns();
         $scope.loadTransactionColumns();
 
+        $scope.loadBankStatements();
         $hotkeys.add({
             combo: 'alt+a',
             description: 'Add Transaction',
@@ -199,7 +204,6 @@ angular.module('mt-app')
         return category;
     };   
     $scope.setFiles = function(element) {
-        $scope.imported = false;
         $scope.$apply(function($scope) {
             var files = element.files;
             console.dir(files);
@@ -207,7 +211,6 @@ angular.module('mt-app')
         });
     }; 
     $scope.importPreview = function() {
-        $scope.imported = true;
         console.info("importPreview");
         var promise = BankStatementService.importBankStatement(
             $scope.selectedStatement, $scope.selectedFile);
@@ -215,7 +218,9 @@ angular.module('mt-app')
             function (data) {
                 if (data) {
                     console.info("data");
-                    $scope.importedList = data;    
+                    $scope.importedList = data; 
+                    $scope.imported = false; 
+                    $scope.allSelected = false;  
                 } 
                 console.dir($scope.transactions);
                 $scope.importTableParams.reload();
@@ -343,6 +348,8 @@ angular.module('mt-app')
     };
     $scope.edit = function(obj) {
         obj.$$edit = true;
+        obj.$$selected = true;
+        $scope.doAfterSelection(obj);        
     };
     $scope.cancel = function(obj) {
         obj.$$edit = false;
@@ -459,34 +466,39 @@ angular.module('mt-app')
     $scope.selectAll = function() {
         $scope.selectedTransactions = [];
         $scope.allSelected = !$scope.allSelected;
+        var selected = $scope.allSelected;
         console.info("selectAll " + $scope.allSelected);
-        angular.forEach($scope.transactions, function(t) {
-            t.$$selected = $scope.allSelected;
-            if (t.$$selected) {
-                t.$$edit = true;
-                $scope.selectedTransactions.push(t);
-            } else {
-                t.$$edit = false;
-            }
-        });
+        for (var i = 0; i < $scope.transactions.length; i++) {
+            var t = $scope.transactions[i];
+            t.$$selected = selected;
+            $scope.doAfterSelection(t);
+        }
     };
     $scope.select = function(t) {    
         t.$$selected = !t.$$selected;
+        $scope.doAfterSelection(t);
+    };
+    $scope.doAfterSelection = function(t) {
+        var index = $scope.selectedTransactions.indexOf(t);
+        console.info(t.description + " " + t.$$selected + " " + index);
+        
         if (t.$$selected) {
-            t.$$edit = true;
-            $scope.selectedTransactions.push(t);
+            if (index == -1) {  
+                if (! TransactionService.isValidTransaction(t)) {                    
+                    $timeout(function(){
+                      t.$$edit = true; 
+                    });
+                }
+                $scope.selectedTransactions.push(t);         
+            }
         } else {
-            t.$$selected = false;
             t.$$edit = false;
-            $scope.allSelected = false;
-            var index = $scope.selectedTransactions.indexOf(t);
             if (index > -1) {
                 $scope.selectedTransactions.splice(index, 1);
             }
         }
-        if ($scope.selectedTransactions.length == $scope.transactions.length) {
-            $scope.allSelected = true;
-        }
+        $scope.allSelected = $scope.selectedTransactions.length >= $scope.transactions.length;
+        console.dir($scope.selectedTransactions);
     };
     $scope.importTransactions = function() {
         var selectedTrans = $scope.selectedTransactions;
@@ -495,6 +507,7 @@ angular.module('mt-app')
             var indexes = [];
             for (var i = 0; i < selectedTrans.length; i++) {
                 var t = selectedTrans[i];
+                t.action.actionIndex = ACTION_INDEX.NEW;
                 var index = $scope.transactions.indexOf(t);
                 indexes.push(index);
             };
@@ -515,12 +528,14 @@ angular.module('mt-app')
                             BankStatementService.storeImportedTransactions(imported);         
                         }
                         $scope.selectedTransactions = [];
+                        $scope.imported = true; 
                     }
                 },
                 function (reason) {
                     console.log('Failed: ' + reason);
                 }
             );
+
         }
     };
     $scope.getTransactionColumnDisplayName = function(propertyName) {

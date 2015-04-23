@@ -27,4 +27,6 @@ public interface ImportService {
 	public List<String> getExcelColumns() throws ServiceException;
 
 	public List<ImportedTransaction> storeImportedTransactions(List<Transaction> transactions) throws ServiceException;
+	
+	public long totalStatements() throws ServiceException;
 }

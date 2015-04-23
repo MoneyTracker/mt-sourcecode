@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.maqs.moneytracker.common.Constansts;
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 import com.maqs.moneytracker.common.util.StringUtil;
@@ -66,7 +66,7 @@ public class TokenManagerImpl implements TokenManager {
 		String username = u.getUsername();
 		content.append(USERNAME).append(EQ).append(username);
 		content.append(SEPARATOR);
-		content.append(Constansts.USER_ID).append(EQ).append(u.getId());
+		content.append(Constants.USER_ID).append(EQ).append(u.getId());
 		
 		Collection<Role> authorities = (Collection<Role>) myUserDetails
 				.getAuthorities();
@@ -92,7 +92,7 @@ public class TokenManagerImpl implements TokenManager {
 		Map<String, String> map = getPropertiesMap(decryptedContent);
 		logger.debug("dec map: " + map);
 		String username = map.get(USERNAME);
-		String userId = map.get(Constansts.USER_ID);
+		String userId = map.get(Constants.USER_ID);
 		User u = new User();
 		u.setUsername(username);
 		Long id = Long.valueOf(userId);

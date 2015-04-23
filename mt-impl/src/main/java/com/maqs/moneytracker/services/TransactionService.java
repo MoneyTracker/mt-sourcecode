@@ -91,4 +91,5 @@ public interface TransactionService {
 	public List<FutureTransaction> listFutureTransactions(QuerySpec querySpec, Page page) throws ServiceException;
 
 	public boolean deleteAll(List<Transaction> transactions) throws ServiceException;
+	
 }

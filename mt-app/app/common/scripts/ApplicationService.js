@@ -1,6 +1,7 @@
 'use strict';
 angular.module('mt-app')
-.service('ApplicationService',['$rootScope', 'dialogs', function(rootScope, dialogs) {
+.service('ApplicationService',['$q', '$http', '$rootScope', 'dialogs', 
+  function($q, $http, rootScope, dialogs) {
 
   Date.isLeapYear = function (year) {
       return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
@@ -43,14 +44,19 @@ angular.module('mt-app')
             declined();
         });
     };
-
     this.getDeleteData=function(msg) {
+      return getDeleteData(msg, undefined);
+    };
+    this.getDeleteData=function(msg, itemNames) {
     	var data = {};
         data.title = "Confirm Delete";
         if (!msg) {
             msg = "it";
         }
         data.message = "Do you want to delete " + msg + "?";
+        if (itemNames) {
+          data.message += "<br><br>[" + itemNames + "]"
+        }
         return data;
     };
 
@@ -87,5 +93,21 @@ angular.module('mt-app')
         return todayText == dateText;
       }
       return false;
+    };
+
+    this.listSetupActivities = function(){
+      var deferred = $q.defer();
+        $http({
+           url: rootScope.hosturl+'/mt/api/application/setupactivities',
+           method: 'GET',
+           headers: {'Content-Type': 'application/json', 'tn': rootScope.access_token}
+          }).success(function(data, status, headers, config) {
+              console.info("listSetupActivities is successful... ");
+              deferred.resolve(data);
+          }).error(function(data, status) {
+              deferred.reject(data);
+          });
+          var res = deferred.promise;
+        return res;
     };
 }]);

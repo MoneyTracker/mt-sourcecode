@@ -5,15 +5,10 @@ angular.module('mt-app')
   this.domainSearchDto = {
         'page': { 'pageNumber': 0, 'pageSize': 100}
   };
-  this.init = function(controllerScope) {
-    if (!this.initialized) {
+  this.init = function(controllerScope) {    
       this.controllerScope = controllerScope;
       this.controllerScope.domainSearchDto = this.domainSearchDto;
-      this.listBankStatements();
-      this.initialized = true;
-    }
   };
-
   this.listBankStatements = function(){
       var scope = this.controllerScope;
       var deferred = $q.defer();

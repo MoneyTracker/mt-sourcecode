@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.maqs.moneytracker.common.Constansts;
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.types.TransactionType;
 
 @JsonInclude(Include.NON_NULL)
@@ -179,9 +179,9 @@ public class Category extends BaseEntity {
 
 	@Override
 	public String toString() {
-		String text = Constansts.EMPTY_STRING;
+		String text = Constants.EMPTY_STRING;
 		if (getParent() != null) {
-			text = getParent().toString() + Constansts.HYPHEN;
+			text = getParent().toString() + Constants.HYPHEN;
 		}
 		text += getName();
 		return text;

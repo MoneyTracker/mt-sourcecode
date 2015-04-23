@@ -101,6 +101,21 @@ angular.module('mt-app')
           var res = deferred.promise;
           return res;
     };
+    this.deleteCategory = function(id){
+      var deferred = $q.defer();
+        $http({
+           url: $rootScope.hosturl+'/mt/api/domain/category/' + id,
+           method: 'DELETE',
+           headers: {'Content-Type': 'application/json', 'tn': $rootScope.access_token}
+          }).success(function(data, status, headers, config) {
+              console.info("deleteCategory is successful... ");
+              deferred.resolve(data);
+          }).error(function(data, status) {
+              deferred.reject(data);
+          });
+          var res = deferred.promise;
+          return res;
+    };
     this.loadAccounts =function($scope) {
         var promise = this.listAccounts(this.searchDto);
         promise.then(
@@ -196,4 +211,21 @@ angular.module('mt-app')
             }
         });
     };
+    this.listSystemCategories = function(page){
+      var deferred = $q.defer();
+        $http({
+           url: $rootScope.hosturl+'/mt/api/domain/systemcategories',
+           method: 'POST',
+           data: page,
+           headers: {'Content-Type': 'application/json', 'tn': $rootScope.access_token}
+          }).success(function(data, status, headers, config) {
+              console.info("listSystemCategories is successful... ");
+              deferred.resolve(data);
+          }).error(function(data, status) {
+              deferred.reject(data);
+          });
+          var res = deferred.promise;
+        return res;
+    };
+    
 }]);

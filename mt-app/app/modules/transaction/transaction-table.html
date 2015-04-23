@@ -80,7 +80,7 @@
     </td>
     <td style="text-align: left; width: 11%" data-title="'Date'" sortable="'onDate'">
       <span ng-if="!t.$$edit">
-        <a href="" ng-click="edit(t)">{{t.onDate | date: dateFormat }}</a>
+        <a href="" class="btn-text" ng-click="edit(t)">{{t.onDate | date: dateFormat }}</a>
       </span>
       <div class="input-group" ng-if="t.$$edit">
         <input id="t{{t.id}}onDate" type="text" show-button-bar="true" datepicker-popup="{{dateFormat}}" datepicker-options="dateOptions" class="form-control" data-ng-model="t.onDate" min-date="minDate" is-open="t.$$dateOpened" close-text="Close" ng-click="openDate($event, t)" ng-change="dateChanged(t)" required >          
@@ -127,9 +127,17 @@
         </button>
       </div>
       <div ng-if="t.message">
-        <span ng-class="{danger: t.messageType == 'err', warning:t.messageType == 'warn'}">
-          <i tooltip="{{t.message}}" class="fa fa-exclamation-triangle notify"></i>
-        </span>
+        <div ng-if="t.messageType == 'err' || t.messageType == 'warn'">
+          <span ng-class="{danger: t.messageType == 'err', warning:t.messageType == 'warn'}">
+            <i tooltip="{{t.message}}" class="fa fa-exclamation-triangle notify"></i>
+          </span>
+        </div> 
+        <div ng-if="t.messageType == 'success'">
+         <span class="success">
+          <i ng-if="t.message == 'Ok to Save'" tooltip="{{t.message}}" class="fa fa-thumbs-up notify"></i>
+          <i ng-if="t.message != 'Ok to Save'" tooltip="{{t.message}}" class="fa fa-check notify"></i>
+         </span>
+        </div> 
       </div>
     </td>      
     </tr>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,6 +42,11 @@ public class UserServiceImpl implements UserService {
 	private TokenManager tokenManager;
 	
 	private final CipherGenerator cipherGenerator;
+	
+	private User systemUser;
+	
+	@Value("${system.user}")
+	private String systemUserName;
 	
 	public UserServiceImpl() {
 		cipherGenerator = new CipherGenerator();
@@ -156,4 +162,12 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
+	@Override
+	public User getSystemUser() throws ServiceException {
+		if (systemUser == null) {
+			logger.debug("getting details of system user: " + systemUserName);
+			systemUser = getUserByUsername(systemUserName);
+		}
+		return systemUser;
+	}
 }

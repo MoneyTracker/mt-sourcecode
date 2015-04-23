@@ -75,8 +75,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 	private static final String SUM_BY_CATEGORIES_REPORT = "Transaction.sumByCategoriesReport";
 
-	public static final String MSG_DUPLICATE_TRANSACTION = "Duplicate";
+	public static final String MSG_DUPLICATE_TRANSACTION = "Failed: Already Exists";
 
+	public static final String MSG_POTENTIAL_DUPLICATE_TRANSACTION = "Potential Duplicate";
+
+	public static final String MSG_OK_TO_SAVE = "Ok to Save";
+
+	private static final String MSG_SUCCESSFUL = "Stored Successfully";
+	
 	@Autowired
 	private LoggedInChecker loggedInChecker;
 	
@@ -228,6 +234,8 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		adjustAccountBalance(current);
+		current.setMessage(TransactionServiceImpl.MSG_SUCCESSFUL);
+		current.setMessageType(MessageType.TYPE_SUCCESS);
 		AppUtil.setDoNothingAction(current);
 	}
 
@@ -327,6 +335,7 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	public boolean isDuplicate(Transaction current) throws ServiceException {
+
 		boolean duplicate = false;
 		String checksum = current.getChecksum();
 		try {
@@ -338,7 +347,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (duplicate) {
 				current.setMessage(MSG_DUPLICATE_TRANSACTION);
 				current.setMessageType(MessageType.TYPE_ERROR);
-			}
+			} 
 		} catch (DataAccessException e) {
 			throw new ServiceException(e.getMessage(), e);
 		}

@@ -18,7 +18,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.maqs.moneytracker.common.Constansts;
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.managers.reports.Report;
 
 /**
@@ -251,7 +251,7 @@ public final class DateUtil {
 
 	public static String getMonthNYear(Date onDate) {
 		DateTime d = new DateTime(onDate);
-		return MONTHS[d.getMonthOfYear() - 1] + Constansts.HYPHEN + d.getYear();
+		return MONTHS[d.getMonthOfYear() - 1] + Constants.HYPHEN + d.getYear();
 	}
 
 	public static boolean isBetweenDateRange(Date onDate, Date[] range) {

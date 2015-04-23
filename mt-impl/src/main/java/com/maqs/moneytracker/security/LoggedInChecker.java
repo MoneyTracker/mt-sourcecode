@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.maqs.moneytracker.common.Constansts;
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
@@ -47,7 +47,7 @@ public class LoggedInChecker {
 			throws ServiceException {
 		QuerySpec querySpec = new QuerySpec(clazz.getName());
 		Long userId = getCurrentUserId();
-		querySpec.addPropertySpec(new PropertySpec(Constansts.USER_ID, userId));
+		querySpec.addPropertySpec(new PropertySpec(Constants.USER_ID, userId));
 		return querySpec;
 	}
 }

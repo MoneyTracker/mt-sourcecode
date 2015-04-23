@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.maqs.moneytracker.common.util.ExcelProcessor;
 import com.maqs.moneytracker.common.util.StringUtil;
 import com.maqs.moneytracker.common.util.Util;
 import com.maqs.moneytracker.model.BankStatement;
+import com.maqs.moneytracker.model.Budget;
 import com.maqs.moneytracker.model.ColumnMap;
 import com.maqs.moneytracker.model.DataField;
 import com.maqs.moneytracker.model.DataMap;
@@ -253,8 +255,11 @@ public class ImportServiceImpl implements ImportService {
 			for (Transaction t : transactions) {
 				String checksum = t.getOriginalChecksum();
 				if (duplicateChecksumList.contains(checksum)) {
-					t.setMessage(TransactionServiceImpl.MSG_DUPLICATE_TRANSACTION);
-					t.setMessageType(MessageType.TYPE_ERROR);
+					t.setMessage(TransactionServiceImpl.MSG_POTENTIAL_DUPLICATE_TRANSACTION);
+					t.setMessageType(MessageType.TYPE_WARN);
+				} else {
+					t.setMessage(TransactionServiceImpl.MSG_OK_TO_SAVE);
+					t.setMessageType(MessageType.TYPE_SUCCESS);
 				}
 			}
 
@@ -475,15 +480,28 @@ public class ImportServiceImpl implements ImportService {
 			importedTransactions = new ArrayList<ImportedTransaction>(
 					transactions.size());
 			Long userId = loggedInChecker.getCurrentUserId();
+			Set<String> checksumList = new HashSet<String>();
 			for (Transaction t : transactions) {
-				ImportedTransaction i = new ImportedTransaction();
-				i.setTransactionId(t.getId());
-				i.setChecksum(t.getOriginalChecksum());
-				importedTransactions.add(i);
-				i.setUserId(userId);
+				String checksum = t.getOriginalChecksum();
+				checksumList.add(checksum);
 			}
 			try {
-				dao.saveAll(importedTransactions);
+				List<ImportedTransaction> alreadyImportedTransactions = listByChecksum(checksumList);				
+				Map<String, ImportedTransaction> map = getImportedTransactionMapByChecksum(alreadyImportedTransactions);
+				for (Transaction t : transactions) {
+					String checksum = t.getOriginalChecksum();
+					if (! map.containsKey(checksum)) {
+						ImportedTransaction i = new ImportedTransaction();
+						i.setTransactionId(t.getId());
+						i.setChecksum(checksum);
+						checksumList.add(checksum);
+						importedTransactions.add(i);
+						i.setUserId(userId);
+					} 						
+				}
+				if (CollectionsUtil.isNonEmpty(importedTransactions)) {
+					dao.saveAll(importedTransactions);
+				}
 			} catch (DataAccessException e) {
 				throw new ServiceException(e.getMessage(), e);
 			}
@@ -491,4 +509,27 @@ public class ImportServiceImpl implements ImportService {
 		return importedTransactions;
 	}
 
+	private Map<String, ImportedTransaction> getImportedTransactionMapByChecksum(
+			List<ImportedTransaction> importedTransactions) {
+		Map<String, ImportedTransaction> map = new HashMap<String, ImportedTransaction>();
+		if (CollectionsUtil.isNonEmpty(importedTransactions)) {
+			for (ImportedTransaction importedTransaction : importedTransactions) {
+				map.put(importedTransaction.getChecksum(), importedTransaction);
+			}
+		}
+			
+		return map;
+	}
+
+	@Override
+	public long totalStatements() throws ServiceException {
+		long count = 0;
+		try {
+			QuerySpec querySpec = loggedInChecker.getQuerySpec(BankStatement.class);
+			count = dao.count(querySpec);	
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+		return count;
+	}
 }

@@ -7,7 +7,7 @@
 
    <div class="col-xs-6 col-sm-2 col-lg-2">
       <button class="btn btn-primary btn-lg" 
-      ng-disabled="selectedTransactions.length == 0 || form_tr.$invalid" 
+      ng-disabled="!(selectedTransactions.length > 0 && form_tr.$valid)" 
       ng-click="importTransactions()" busy="Please wait..." busy-when-url="store" >
         <i class="fa fa-floppy-o"></i> Save All
       </button>
@@ -70,12 +70,10 @@
           <div><i class="glyphicon glyphicon-align-justify"></i> Description</div>
       </th>
       <th style="text-align: center">
-        <!-- <div class="buttons">
-          <button class="btn btn-primary btn-sm circle" ng-click="importTransactions()" shortcut="{'alt+i': import}" ng-disabled="">
-            <i class="fa fa-floppy-o"></i>
-          </button>
-        </div>
-        <span aria-hidden="true" tooltip="Notification"><i class="label label-warning glyphicon glyphicon-question-sign"></i></span> -->
+        <!-- <span class="notify-sm" aria-hidden="true" 
+        tooltip="Success / Failure">
+          <i class="fa fa-thumbs-up success"></i>
+        </span> -->
       </th>
     </tr>
 </thead>
@@ -109,7 +107,7 @@
 
     <td style="text-align: left; width: 11%" data-title="'Date'" sortable="'onDate'">
       <span ng-if="!t.$$edit">
-        <a href="" ng-click="edit(t)">{{t.dateString}}</a>
+        <a href="" class="btn-text" ng-click="edit(t)">{{t.dateString}}</a>
       </span>
       <div class="input-group" ng-if="t.$$edit">
         <input id="t{{t.id}}onDate" type="text" datepicker-popup="{{selectedStatement.dateFormat}}" class="form-control" data-ng-model="t.onDate" min-date="minDate" is-open="t.$dateOpened" datepicker-options="dateOptions" close-text="Close" focus ng-click="openDate($event, t)" required>
@@ -150,38 +148,18 @@
         <input id="t{{t.id}}desc" class="form-control" type="text" ng-model="t.description" />
       </div>
     </td>
-    <td  style="text-align: left; width: 3%">
-      <div ng-if="!t.message">
-        <button class="btn btn-default btn-sm circle" ng-click="advanced(t)" tooltip="Advanced Mode">
-            <i class="fa fa-expand"></i>
-        </button>
-      </div>
-      <div ng-if="t.message">
-        <span ng-class="{danger: t.messageType == 'err', warning:t.messageType == 'warn'}">
-          <i tooltip="{{t.message}}" class="fa fa-exclamation-triangle notify"></i>
-        </span>
-      </div>
-      <!-- <div  ng-if="!t.$$edit">
-        <div class="buttons">
-          <button class="btn btn-default btn-sm circle" ng-click="edit(t)">
-            <i class="fa fa-pencil"></i>
-          </button>
-        </div>
-        <div ng-if="t.message != undefined">
-          <span aria-hidden="true" tooltip="{{t.message}}"><i class="label label-danger glyphicon glyphicon-thumbs-down"></i></span></div>
-        <div ng-if="t.message == undefined">
-          <span aria-hidden="true" tooltip="Ok to save"><i class="label label-success glyphicon glyphicon-thumbs-up"></i></span></div>
-        </div>
-      </div>
-      <div class="buttons" ng-if="t.$$edit">
-        <button class="btn btn-primary btn-sm circle" tooltip="{{t.message}}" ng-click="saveTransaction(t)" ng-disabled="form_tr.$invalid">
-          <i class="fa fa-check"></i>
-        </button>
-
-        <button class="btn btn-warning btn-sm circle" ng-click="cancel(t)">
-          <i class="fa fa-remove"></i>
-        </button>
-      </div> -->
+    <td  style="text-align: center; width: 3%">          
+     <div ng-if="t.messageType == 'err' || t.messageType == 'warn'">
+      <span ng-class="{danger: t.messageType == 'err', warning:t.messageType == 'warn'}">
+        <i tooltip="{{t.message}}" class="fa fa-exclamation-triangle notify"></i>
+      </span>
+     </div> 
+     <div ng-if="t.messageType == 'success'">
+      <span class="success">
+        <i ng-if="t.message == 'Ok to Save'" tooltip="{{t.message}}" class="fa fa-thumbs-up notify"></i>
+        <i ng-if="t.message != 'Ok to Save'" tooltip="{{t.message}}" class="fa fa-check notify"></i>
+      </span>
+     </div>      
     </td>
 
   </tr>

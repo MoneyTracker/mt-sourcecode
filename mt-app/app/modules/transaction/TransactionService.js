@@ -255,5 +255,8 @@ angular.module('mt-app')
           var res = deferred.promise;
           return res;
     };
+    this.isValidTransaction = function(t) {
+      return t.onDate && t.amount && t.categoryId && t.accountId;
+    };
 }]);
 

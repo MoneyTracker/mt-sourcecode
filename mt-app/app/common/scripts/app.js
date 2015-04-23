@@ -5,7 +5,6 @@ var app = angular.module('mt-app', [
     'ngAutocomplete',
     'ui.router',
     'LocalStorageModule',
-    // 'chieffancypants.loadingBar',
     'services.config',
     'ui.select2',
     'highcharts-ng',
@@ -20,6 +19,19 @@ var app = angular.module('mt-app', [
     'ngBusy',
     'angular-progress-arc'
 ]);
+app.directive('ngEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngEnter);
+                });
+
+                event.preventDefault();
+            }
+        });
+    };
+});
 app.config(function (datepickerConfig) {
   datepickerConfig.showWeeks = false;
 });
@@ -128,9 +140,9 @@ app.config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider
            templateUrl: 'modules/home/landingpage.html',
            controller: 'LandingPageController'
         })
-        .state('features', {
-           url: '/features',
-           templateUrl: 'modules/home/features.html',
+        .state('features.budget', {
+           url: '/features.budget',
+           templateUrl: 'modules/home/features.html#budget',
            controller: 'LandingPageController'
         })
         .state('dashboard', {
@@ -226,8 +238,8 @@ app.run(function ($rootScope, configuration) {
     $rootScope.defaultCurrency = "Rs. ";
     $rootScope.defaultCurrencyClass = "fa fa-inr";
     $rootScope.dateFormat = "yyyy-MMM-dd";
-    $rootScope.dateTimeFormat = "yyyy-MM-dd h:mm a";
-    $rootScope.minDate="2013-01-01",
+    $rootScope.dateTimeFormat = "yyyy-MMM-dd h:mm a";
+    $rootScope.minDate="2013-Jan-01",
     $rootScope.months = [{"id": 1,"value":'Jan'}, {"id": 2,"value":'Feb'},
     {"id": 3,"value":'Mar'},
     {"id": 4,"value":'Apr'}, {"id": 5,"value":'May'}, {"id": 4,"value":'Jun'},

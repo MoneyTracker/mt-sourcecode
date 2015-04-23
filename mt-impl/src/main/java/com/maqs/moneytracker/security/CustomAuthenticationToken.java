@@ -6,7 +6,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.maqs.moneytracker.common.Constansts;
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 
 public class CustomAuthenticationToken extends AbstractAuthenticationToken implements Authentication {
@@ -29,7 +29,7 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken imple
 	
 	@Override
     public Object getCredentials() {
-        return Constansts.EMPTY_STRING;
+        return Constants.EMPTY_STRING;
     }
  	
     @Override

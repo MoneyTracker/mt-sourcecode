@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
+import com.maqs.moneytracker.dto.SetupActivityDto;
 import com.maqs.moneytracker.model.Setting;
 import com.maqs.moneytracker.services.ApplicationService;
 import com.wordnik.swagger.annotations.Api;
@@ -43,4 +44,10 @@ public class ApplicationController {
 		return settings;
 	}
 	
+	@RequestMapping(value = "/setupactivities", method = RequestMethod.GET)
+	public @ResponseBody List<SetupActivityDto> listSetupActivity() throws ServiceException {
+		logger.debug("listSetupActivity is calleed");
+		List<SetupActivityDto> list = applicationService.listSetupActivity();
+		return list;
+	}
 }

@@ -322,7 +322,6 @@ public class AppUtil {
 	private static Object getFieldValue0(Object o, String propName) {
 		try {
 			String methodName = GET + StringUtils.capitalize(propName);
-			logger.debug("method to be called: " + methodName);
 			Method m = o.getClass().getMethod(methodName, null);
 			return m.invoke(o, null);
 		} catch (Exception e) {

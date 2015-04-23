@@ -379,4 +379,29 @@ angular.module('mt-app')
       console.dir($scope.historyExpSeries);
       console.dir($scope.historyIncSeries);
     };
+    $scope.showSetupProgress = function() {
+      console.info("showSetupProgress");            
+      var promise = ApplicationService.listSetupActivities();
+        promise.then(
+            function (data) {
+              if (data) {
+                $scope.setupActivities = data;
+                var total = 0;
+                var totalCompleted = 0;
+                for (var i = 0; i < data.length; i++) {
+                  var a = data[i];
+                  total += data[i].points; 
+                  if (a.done) {
+                   totalCompleted += data[i].points; 
+                  }
+                };
+                var completion = totalCompleted / total;
+                $scope.activitiesCompletion = completion;
+              }
+            },
+            function (reason) {
+                console.log('Failed: ' + reason);
+            }
+        );
+    };
 }]);

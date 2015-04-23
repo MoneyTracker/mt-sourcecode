@@ -28,9 +28,9 @@
   </div>
   
   <div class="col-xs-4 col-sm-2 col-lg-2">
-      <button class="btn btn-primary btn-lg" ng-disabled="toBeStoredList.length <= 0" ng-click="saveAll()" busy="Please wait..." busy-when-url="store" >
-        <i class="fa fa-floppy-o"></i> Save All 
-        <span ng-if="toBeStoredList.length > 0" class="badge">{{toBeStoredList.length}}</span>
+      <button class="btn btn-primary btn-lg" ng-click="saveAll()" busy="Please wait..." busy-when-url="store" ng-disabled="!(storeList.length > 0 && form_tr.$valid)" >
+        <i class="fa fa-floppy-o"></i> Save  
+        <!-- <span ng-if="storeList.length > 0" class="badge">{{storeList.length}}</span> -->
       </button>
   </div>
   <div class="col-xs-4 col-sm-2 col-lg-2" style="padding-right: 0px">

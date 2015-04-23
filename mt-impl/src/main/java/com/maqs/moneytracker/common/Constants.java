@@ -1,17 +1,16 @@
 package com.maqs.moneytracker.common;
 
-import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 
 /**
  * The place to hold the constants.
  * @author maq
  *
  */
-public final class Constansts {
+public final class Constants {
 	/**
 	 * Constructor is private, just to avoid instantiation.
 	 */
-	private Constansts() {
+	private Constants() {
 	}
 	/*
 	 * Constants are defined here...
@@ -81,4 +80,30 @@ public final class Constansts {
 	public static final String HYPHEN = "-";
 
 	public static final String USER_ID = "userId";
+	
+	public static final String SYSTEM_USER = "system.user";
+
+	public static final String ACTIVITY_ACCT = "Accounts Created?";
+	
+	public static final String ACTIVITY_CAT = "Atleast 5 Categories available?";
+	
+	public static final String ACTIVITY_TRAN = "Transactions Created?";
+
+	public static final String ACTIVITY_BUDGET = "Budget Created?";
+	
+	public static final String ACTIVITY_STATEMENTS = "Import Statements Created?";
+	
+	public static final int ACTIVITY_ACCT_POINTS = 25;
+	
+	public static final int ACTIVITY_CAT_POINTS = 25;
+	
+	public static final int ACTIVITY_TRAN_POINTS = 20;
+	
+	public static final int ACTIVITY_BUDGET_POINTS = 15;
+
+	public static final int ACTIVITY_STATEMENT_POINTS = 15;
+	
+	public static final String ACTIVITY_TOTAL_RES = "Total {0} Available";
+
+	public static final long ACTIVITY_CAT_MIN = 5;
 }

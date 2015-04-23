@@ -39,10 +39,6 @@
               <button class="btn btn-success btn-sm circle" ng-click="addAccount()" tooltip="Add Account" shortcut="{'alt+a': addAccount}">
                 <i class="fa fa-plus"></i>
               </button>
-
-              <!-- <button class="btn btn-primary btn-sm circle" ng-click="saveAccounts()" tooltip="Save All" shortcut="{'alt+s': saveAccounts}">
-                <i class="fa fa-save"></i>
-              </button> -->
             </div>
           </th>
       </tr>
@@ -50,7 +46,9 @@
     <tbody>
     <tr id="tr_acct{{a.id}}" ng-repeat="a in accounts" ng-class-odd="'odd-row'" ng-class-even="'even-row'">
       <td style="text-align: left; width: 30%">
-        <span ng-if="!a.$$edit">{{a.name}}</span>
+        <span ng-if="!a.$$edit">
+          <a href="" ng-click="editAccount(a)">{{a.name}}</a>
+        </span>
         <div class="input-group" ng-if="a.$$edit">
           <input id="acct{{a.id}}_name" name="acct{{a.id}}_name" class="form-control" type="text" ng-model="a.name" ng-change="accountChanged(a)" required />
         </div>
@@ -70,16 +68,12 @@
       <td style="text-align: right; width: 25%" data-title="'Balance'" sortable="'balance'">
         <span ng-if="!a.$$edit">{{a.balance | number : 2 }}</span>
         <div ng-if="a.$$edit">
-          <input id="a{{a.id}}_amount" name="t{{a.id}}_amount" class="form-control" type="number" ng-model="a.balance" ng-change="accountChanged(a)" required />
+          <input id="a{{a.id}}_amount" name="t{{a.id}}_amount" class="form-control" type="number" ng-model="a.balance" ng-change="accountChanged(a)" step="50" required />
         </div>
       </td>
 
       <td  style="text-align: left; width: 15%">
         <div class="buttons" ng-if="!a.$$edit">
-          <button class="btn btn-default btn-sm circle" ng-click="editAccount(a)">
-            <i class="fa fa-pencil"></i>
-          </button>
-
           <button class="btn btn-danger btn-sm circle" ng-click="deleteAccount(a)">
             <i class="fa fa-trash"></i>
           </button>
