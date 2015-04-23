@@ -13,7 +13,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.maqs.moneytracker.common.logging.Logger;
+import org.apache.log4j.Logger;
+
 import com.maqs.moneytracker.common.transferobjects.Entity;
 import com.maqs.moneytracker.common.util.CollectionsUtil;
 

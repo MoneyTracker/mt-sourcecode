@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.maqs.moneytracker.common.Constants;
@@ -21,7 +20,7 @@ import com.maqs.moneytracker.types.Role;
 
 public class TokenManagerImpl implements TokenManager {
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	private Logger logger = Logger.getLogger(getClass());
 
 	private static final String SALT = UUID.randomUUID().toString();
 

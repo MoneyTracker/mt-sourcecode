@@ -2,8 +2,7 @@ package com.maqs.moneytracker.security;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,7 +14,7 @@ import com.maqs.moneytracker.types.Role;
 
 public class CustomUserDetailsService implements UserDetailsService {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 
 	private final UserService userService;
 

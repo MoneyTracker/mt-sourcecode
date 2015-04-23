@@ -3,8 +3,7 @@ package com.maqs.moneytracker.common.util;
 import java.util.Collection;
 
 import org.apache.commons.beanutils.PropertyUtils;
-
-import com.maqs.moneytracker.common.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * All the utility methods pertaining to Collection APIs will be here.

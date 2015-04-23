@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;

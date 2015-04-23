@@ -1,7 +1,6 @@
 package com.maqs.moneytracker.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +15,7 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken imple
 	 */
 	private static final long serialVersionUID = -8482729479409817604L;
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
     
     public CustomAuthenticationToken(UserDetails userDetails) {
 		super(userDetails.getAuthorities());

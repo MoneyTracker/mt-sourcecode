@@ -5,10 +5,9 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.service.jdbc.connections.spi.MultiTenantConnectionProvider;
-
-import com.maqs.moneytracker.common.logging.Logger;
 
 public class MultitenantConnectionProvider implements
 		MultiTenantConnectionProvider {

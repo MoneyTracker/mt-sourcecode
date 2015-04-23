@@ -5,7 +5,7 @@ import java.util.Currency;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.maqs.moneytracker.common.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * Utility class for currency.

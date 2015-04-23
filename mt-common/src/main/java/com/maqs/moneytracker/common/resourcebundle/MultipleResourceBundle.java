@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import sun.util.ResourceBundleEnumeration;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.service.runtimeexception.MissingResourceException;
 
 /**

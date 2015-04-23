@@ -1,6 +1,5 @@
 package com.maqs.moneytracker.common.util;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,11 +11,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.managers.reports.Report;
@@ -29,7 +27,7 @@ import com.maqs.moneytracker.managers.reports.Report;
  */
 public final class DateUtil {
 
-	private static Logger logger = LoggerFactory.getLogger(DateUtil.class);
+	private static Logger logger = Logger.getLogger(DateUtil.class);
 
 	public static final String DEFAULT_FORMAT = "yyyy-MMM-dd";
 

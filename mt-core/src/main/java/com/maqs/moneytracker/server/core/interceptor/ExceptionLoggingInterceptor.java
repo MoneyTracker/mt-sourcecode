@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.log4j.Logger;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
 
 /**

@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.maqs.moneytracker.common.ValidationException;
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.paging.list.PageableList;
 import com.maqs.moneytracker.common.paging.spec.Operation;

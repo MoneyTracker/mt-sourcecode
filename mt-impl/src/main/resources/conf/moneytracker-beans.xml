@@ -23,8 +23,8 @@
 	<bean id="log4jInitialization"
 		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetClass"
-			value="com.maqs.moneytracker.common.logging.Log4jConfigurator" />
-		<property name="targetMethod" value="configure" />
+			value="org.springframework.util.Log4jConfigurer" />
+		<property name="targetMethod" value="initLogging" />
 		<property name="arguments">
 			<list>
 				<value>file:${mt_home}/log4j.properties</value>

@@ -7,7 +7,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import com.maqs.moneytracker.common.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * Base test case

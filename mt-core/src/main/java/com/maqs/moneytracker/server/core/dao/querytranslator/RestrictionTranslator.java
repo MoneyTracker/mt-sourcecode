@@ -3,6 +3,7 @@ package com.maqs.moneytracker.server.core.dao.querytranslator;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Expression;
@@ -10,7 +11,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.OrderByOperation;
 import com.maqs.moneytracker.common.paging.spec.OrderBySpec;

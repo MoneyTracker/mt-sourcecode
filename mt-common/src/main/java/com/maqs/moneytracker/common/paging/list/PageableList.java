@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.log4j.Logger;
+
 import com.maqs.moneytracker.common.Constansts;
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.paging.Page;
 
 /**

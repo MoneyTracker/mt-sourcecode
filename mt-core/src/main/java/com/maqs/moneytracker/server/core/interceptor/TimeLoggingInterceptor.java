@@ -2,8 +2,7 @@ package com.maqs.moneytracker.server.core.interceptor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import com.maqs.moneytracker.common.logging.Logger;
+import org.apache.log4j.Logger;
 
 
 public class TimeLoggingInterceptor implements MethodInterceptor {

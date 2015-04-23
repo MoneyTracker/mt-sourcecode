@@ -11,7 +11,7 @@
 		<groupId>com.maqs</groupId>
 		<artifactId>mt</artifactId>
 		<version>1.0</version>
-	</parent>	
+	</parent>
 	<dependencies>
 		<dependency>
 			<groupId>com.maqs.mt</groupId>
@@ -29,25 +29,7 @@
 			<artifactId>stax-api</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>jms</artifactId>
-			<version>1.1</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.sun.jdmk</groupId>
-			<artifactId>jmxtools</artifactId>
-			<version>1.2.1</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.sun.jmx</groupId>
-			<artifactId>jmxri</artifactId>
-			<version>1.2.1</version>
-		</dependency>
--->
+
 		<dependency>
 			<groupId>org.jgroups</groupId>
 			<artifactId>jgroups</artifactId>
@@ -60,13 +42,19 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-ehcache</artifactId>
 			<version>${hibernate.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
@@ -103,19 +91,12 @@
 			<version>0.9.1</version>
 		</dependency>
 
-		
-		<dependency>
-			<groupId>com.jolbox</groupId>
-			<artifactId>bonecp</artifactId>
-			<version>0.8.0-rc1</version>
-		</dependency>
-				
 		<dependency>
 			<groupId>org.imgscalr</groupId>
 			<artifactId>imgscalr-lib</artifactId>
 			<version>4.2</version>
 		</dependency>
-			
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>

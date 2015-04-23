@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.paging.list.PageableList;
 import com.maqs.moneytracker.common.paging.spec.Operation;

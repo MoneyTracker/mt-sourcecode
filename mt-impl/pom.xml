@@ -37,12 +37,5 @@
 			<version>3.10-FINAL</version>
 		</dependency>
 		
-
-		<!-- <dependency>
-			<groupId>com.nimbusds</groupId>
-			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>3.8</version>
-		</dependency>
- -->
 	</dependencies>
 </project>

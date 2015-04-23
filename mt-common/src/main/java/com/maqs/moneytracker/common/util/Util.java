@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
 
-import com.maqs.moneytracker.common.logging.Logger;
 import com.maqs.moneytracker.common.transferobjects.Action;
 import com.maqs.moneytracker.common.transferobjects.Entity;
 
