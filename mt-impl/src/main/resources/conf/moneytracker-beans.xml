@@ -27,7 +27,7 @@
 		<property name="targetMethod" value="configure" />
 		<property name="arguments">
 			<list>
-				<value>${mt_home}/log4j.properties</value>
+				<value>file:${mt_home}/log4j.properties</value>
 			</list>
 		</property>
 	</bean>
