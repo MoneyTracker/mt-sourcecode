@@ -140,9 +140,9 @@ app.config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider
            templateUrl: 'modules/home/landingpage.html',
            controller: 'LandingPageController'
         })
-        .state('features.budget', {
-           url: '/features.budget',
-           templateUrl: 'modules/home/features.html#budget',
+        .state('features', {
+           url: '/features',
+           templateUrl: 'modules/home/features.html',
            controller: 'LandingPageController'
         })
         .state('dashboard', {

@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col-xs-6 col-sm-4 col-lg-2">
       <div class="input-group">
-        <a href="" class="input-group-addon" ng-click="prevMonth()"><i class="fa fa-arrow-left" tooltip="Go to previous month"></i></a>
+        <a href="" class="input-group-addon" ng-click="prevMonth()"><i class="fa fa-arrow-left" tooltip="Previous month"></i></a>
         <div class="input-group">
           <input type="text" datepicker-popup="{{dateFormat}}" class="form-control" data-ng-model="searchDto.fromDate" min-date="minDate" is-open="$parent.fromDateOpened"
           close-text="Close" ng-click="openFromDate($event)">
@@ -17,7 +17,7 @@
         <div class="input-group" id="to">
           <input type="text" datepicker-popup="{{dateFormat}}" class="form-control" data-ng-model="searchDto.toDate" min-date="searchDto.fromDate" is-open="$parent.toDateOpened"
           close-text="Close" ng-click="openToDate($event)">
-          <a href="" class="input-group-addon" ng-click="nextMonth()"><i class="fa fa-arrow-right" tooltip="Go to next month"></i></a>
+          <a href="" class="input-group-addon" ng-click="nextMonth()"><i class="fa fa-arrow-right" tooltip="Next month"></i></a>
         </div>
       </div>
     </div>
