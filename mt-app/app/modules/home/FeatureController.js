@@ -1,15 +1,17 @@
 'use strict';
 
 angular.module('mt-app')
-    .controller('LandingPageController', ['dialogs', '$rootScope', '$scope', '$state', '$location', 'UserService',
+    .controller('FeatureController', ['dialogs', '$rootScope', '$scope', '$state', '$location', 'UserService',
     function (dialogs, $rootScope, $scope, $state, $location, UserService) {
-    console.info("LandingPageController");
-    $scope.myInterval = 5000;
+    console.info("FeatureController");
     $scope.featuresInterval = 10000;
+    var bulletImage = 'common/images/32/Money.png';
+
+    
   $scope.slides = [
-    { // Finance.png
+    { 
       image: 'common/images/Carousel/Money.jpg',
-      logo: 'common/images/128/Money.png',
+      bullet: bulletImage,
       textColor: '#FFF',
       caption: 'Track your Money',
       heading: 'Money… Money…. Where are you?',
