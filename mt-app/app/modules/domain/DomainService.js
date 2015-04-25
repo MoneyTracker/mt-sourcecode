@@ -70,6 +70,22 @@ angular.module('mt-app')
           var res = deferred.promise;
         return res;
     };
+    this.storeCategoryTree = function(categories){
+      var deferred = $q.defer();
+        $http({
+           url: $rootScope.hosturl+'/mt/api/domain/categorytree',
+           method: 'PUT',
+           headers: {'Content-Type': 'application/json', 'tn': $rootScope.access_token},
+           data: categories
+          }).success(function(data, status, headers, config) {
+              console.info("storeCategoryTree is successful... ");
+              deferred.resolve(data);
+          }).error(function(data, status) {
+              deferred.reject(data);
+          });
+          var res = deferred.promise;
+        return res;
+    };
     this.storeAccounts = function(accounts){
       var deferred = $q.defer();
         $http({

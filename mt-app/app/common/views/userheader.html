@@ -1,7 +1,7 @@
 <div class="row" ng-controller="NavController">
   <div class="hidden-xs col-sm-9 col-lg-9" style="padding: 0px">
     <ul class="nav nav-pills">
-      <li class="nav-li" ng-repeat="navItem in navItems" ng-class="{active:navItem.active, disabled: navItem.disabled}"  ng-click="selectNav(navItem)">
+      <li class="nav-li" ng-repeat="navItem in navItems">
           <a ui-sref="{{navItem.url}}" style="text-align: left">
               <span>{{navItem.title}}</span>
           </a>
@@ -14,7 +14,7 @@
         <i class="fa fa-bars"></i>
       </button>
       <ul class="dropdown-menu" role="menu">
-        <li class="nav-li" ng-repeat="navItem in navItems" ng-class="{active:navItem.active, disabled: navItem.disabled}"  ng-click="selectNav(navItem)">
+        <li class="nav-li" ng-repeat="navItem in navItems">
             <a ui-sref="{{navItem.url}}" style="text-align: left">
                 <span>{{navItem.title}}</span>
             </a>

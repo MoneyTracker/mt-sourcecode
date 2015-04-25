@@ -5,10 +5,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.maqs.moneytracker.common.util.DateDeserializer;
-import com.maqs.moneytracker.common.util.DateSerializer;
 import com.maqs.moneytracker.types.RecurringType;
 
 @JsonInclude(Include.NON_NULL)
@@ -31,8 +27,6 @@ public class Transaction extends BaseEntity {
 
 	public static final String DATE_STRING = "dateString";
 
-//	@JsonSerialize(using = DateSerializer.class)
-//	@JsonDeserialize(using = DateDeserializer.class)
 	private Date onDate;
 
 	private BigDecimal amount;
@@ -62,10 +56,6 @@ public class Transaction extends BaseEntity {
 	private String checksum;
 	
 	private String originalChecksum;
-	
-	private String message;
-	
-	private String messageType;
 		
 	private String dateString;
 	
@@ -196,22 +186,6 @@ public class Transaction extends BaseEntity {
 	
 	public void setChecksum(String checksum) {
 		this.checksum = checksum;
-	}
-	
-	public String getMessage() {
-		return message;
-	}
-	
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
-	public String getMessageType() {
-		return messageType;
-	}
-	
-	public void setMessageType(String messageType) {
-		this.messageType = messageType;
 	}
 	
 	public String getOriginalChecksum() {

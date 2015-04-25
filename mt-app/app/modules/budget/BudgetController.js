@@ -168,7 +168,7 @@ angular.module('mt-app')
         budgetItem.children.unshift($scope.inserted);
     };
     $scope.createNewBudgetItem = function(budgetItem) {
-        if ($scope.budgetItems == undefined) {
+        if (! $scope.budgetItems) {
             $scope.budgetItems = [];
         }
         budgetItem.budgetId = $scope.selectedBudget;

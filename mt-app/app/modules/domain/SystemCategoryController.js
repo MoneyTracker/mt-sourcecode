@@ -57,24 +57,32 @@ angular.module('mt-app')
     }; // end cancel
     
     $scope.import = function(){
-        $modalInstance.close(data);
-    };
-    $scope.selectAll = function() {
-        $scope.selectedCategories = [];
-        $scope.allSelected = !$scope.allSelected;
-        console.info("selectAll " + $scope.allSelected);
-        if ($scope.allSelected) {
-          angular.forEach($scope.systemCategories, function(c) {
-            c.$$selected = $scope.allSelected;
-            $scope.selectedCategories.push(c);
-          });
-        } else {
-          $scope.selectedCategories = [];
+      var toBeStoredList = [];
+      for (var i = 0; i < $scope.selectedCategories.length; i++) {
+        var c = $scope.selectedCategories[i];
+        console.info(c.name);
+        if (c.$$selected) { 
+          var childList = [];
+          c.action.actionIndex = ACTION_INDEX.NEW;
+          toBeStoredList.push(c);
+          if (c.children && c.children.length > 0) {
+            for (var j = 0; j < c.children.length; j++) {
+              var child = c.children[j];
+              if (child.$$selected) {
+                child.action.actionIndex = ACTION_INDEX.NEW;
+                childList.push(child);
+              }
+            };  
+          }
+          c.children = childList;
         }
-    }; 
-    $scope.select = function(c) {  
+      };
+      $modalInstance.close(toBeStoredList);
+    };
+    $scope.select = function(c) { 
+        console.info("select " + c.name); 
         c.$$selected = !c.$$selected;
-        if (c.$$selected) {
+        if (c.$$selected) {          
           c.defaultAccountId = undefined; 
           $scope.selectedCategories.push(c);
         } else {
@@ -85,8 +93,16 @@ angular.module('mt-app')
               $scope.selectedCategories.splice(index, 1);
           }
         }
-        if ($scope.selectedCategories.length == $scope.transactions.length) {
-            $scope.allSelected = true;
+        if (c.children && c.children.length > 0) {
+          if (c.$$selected) {
+            c.$$hideRows = false;
+          }
+          for (var i = 0; i < c.children.length; i++) {
+            var child = c.children[i];
+            child.$$selected = c.$$selected;
+          };
         }
+        console.info("$scope.selectedCategories " + $scope.selectedCategories.length);
+        console.dir($scope.selectedCategories);
     };
 }]);

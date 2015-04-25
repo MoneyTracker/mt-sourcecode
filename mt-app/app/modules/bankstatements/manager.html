@@ -66,6 +66,13 @@
          </div>
         </div>
       </div>
+      
+      <div class="row" style="padding-bottom: 10px">
+          <button type="submit" class="btn btn-primary btn-lg" ng-click="save()">
+            Save {{selectedStatement.name}} Statement
+          </button>  
+      </div>
+
       <div class="row">
         <button type="submit" class="btn btn-danger btn-lg" ng-click="deleteStatement(selectedStatement)">
           Delete {{selectedStatement.name}} Statement
@@ -82,22 +89,9 @@
     <div class="col-xs-12 col-sm-12 col-lg-12">
         <div ng-include="'modules/bankstatements/datamap.html'" />
      </div>
-  </div>
-  <div ng-include="'action.html'" />
+  </div>  
 </div>
 
 <script type="text/ng-template" id="action.html">
-  <div class="row" style="padding-bottom: 10px;text-align: right">
-    <div class="col-xs-12 col-sm-8 col-lg-8"></div>
-    <div class="col-xs-6 col-sm-2 col-lg-2">
-       <button type="submit" class="btn btn-text btn-lg" ng-click="cancel()">
-         Cancel
-       </button>
-   </div>
-     <div class="col-xs-6 col-sm-2 col-lg-2">
-      <button type="submit" class="btn btn-primary btn-lg" ng-click="save()">
-        Save
-      </button>
-   </div>   
-  </div>
+  
 </script>

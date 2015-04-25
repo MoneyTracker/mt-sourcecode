@@ -1,5 +1,5 @@
 <ul class="nav nav-pills nav-stacked" ng-controller="NavController" >
-    <li class="nav-li" ng-class="{active:navItem.active}" ng-repeat="navItem in navItems" ng-click="selectNav(navItem)">
+    <li class="nav-li" ng-repeat="navItem in navItems">
         <a ui-sref="{{navItem.url}}" style="text-align: left">
             <span class="{{navItem.logoClass}}" aria-hidden="true"></span>
             <span class="heading">{{navItem.title}}</span>

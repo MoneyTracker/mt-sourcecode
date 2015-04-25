@@ -925,20 +925,19 @@ border-top: 1px solid #ddd;
  color: white !important;
 }
 .nav-li {
-	/*padding-top: 1px;
-	padding-bottom: 3px;
-	border-bottom: 5px solid #C3B9B9;*/
+	
 }
 .nav>li>a {
   padding: 8px;
   color: #fff;
 }
-.nav-li.active {
- color: #fff;
+.nav-li>selected {
+ color: #FF0000;
+ background-color: #fff;
 }
 .nav-li>a:hover {
-  color: #252530;
-	background-color: #808080;
+  color: #808080;
+	background-color: #fff;
 }
 .highcharts-no-data {
   font-family: inherit !important;
@@ -1224,7 +1223,4 @@ button {cursor: pointer;}
   font-size: 50px;
   padding: 32px;
   color: #FFF;
-}
-a {
-    color: inherit;
 }

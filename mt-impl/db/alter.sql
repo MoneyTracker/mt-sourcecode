@@ -1,65 +1,40 @@
--- add user_id 
-alter table account add user_id int(20) NOT NULL;
-update account set user_id = (select id from mt_user where name = 'Demo');
+drop index unq_account_name on account;
 alter table account 
-add constraint fk_account_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+add constraint unq_account_name unique (name,user_id);
 
-alter table bnk_stmnt add user_id int(20) NOT NULL;
-update bnk_stmnt set user_id = (select id from mt_user where name = 'Demo');
-alter table bnk_stmnt 
-add constraint fk_bnk_stmnt_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
--- 
-alter table bnk_stmnt_col_map add user_id int(20) NOT NULL;
-update bnk_stmnt_col_map set user_id = (select id from mt_user where name = 'Demo');
-alter table bnk_stmnt_col_map 
-add constraint fk_bnk_stmnt_col_map_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table bnk_stmnt_data_field add user_id int(20) NOT NULL;
-update bnk_stmnt_data_field set user_id = (select id from mt_user where name = 'Demo');
-alter table bnk_stmnt_data_field 
-add constraint fk_bnk_stmnt_data_field_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table bnk_stmnt_data_map add user_id int(20) NOT NULL;
-update bnk_stmnt_data_map set user_id = (select id from mt_user where name = 'Demo');
-alter table bnk_stmnt_data_map 
-add constraint fk_bnk_stmnt_data_map_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table budget add user_id int(20) NOT NULL;
-update budget set user_id = (select id from mt_user where name = 'Demo');
-alter table budget 
-add constraint fk_budget_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table budget_item add user_id int(20) NOT NULL;
-update budget_item set user_id = (select id from mt_user where name = 'Demo');
-alter table budget_item 
-add constraint fk_budget_item_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table category add user_id int(20) NOT NULL;
-update category set user_id = (select id from mt_user where name = 'Demo');
+drop index unq_category_name on category;
 alter table category 
-add constraint fk_category_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+add constraint unq_category_name unique (name,prnt_cat_id,tran_type,user_id);
 
-alter table budget add user_id int(20) NOT NULL;
-update budget set user_id = (select id from mt_user where name = 'Demo');
+drop index unq_budget_name on budget;
 alter table budget 
-add constraint fk_budget_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+add constraint unq_budget_name unique (name,user_id);
 
-alter table future_transaction add user_id int(20) NOT NULL;
-update future_transaction set user_id = (select id from mt_user where name = 'Demo');
-alter table future_transaction 
-add constraint fk_future_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+alter table budget_item drop foreign key fk_category_id;
+alter table budget_item drop foreign key fk_budget_id;
+drop index unq_budget_cat on budget_item;
+alter table budget_item 
+add constraint fk_category_id foreign key (cat_id) references category (id ) on delete cascade,
+add constraint fk_budget_id foreign key (budget_id) references budget (id ) on delete cascade;
+alter table budget_item 
+add constraint unq_budget_cat unique (budget_id, cat_id, user_id);
 
-alter table imported_transaction add user_id int(20) NOT NULL;
-update imported_transaction set user_id = (select id from mt_user where name = 'Demo');
+drop index bnk_st_unq_name on bnk_stmnt;
+alter table bnk_stmnt 
+add constraint bnk_st_unq_name unique (name,user_id);
+
+alter table bnk_stmnt_data_field drop foreign key fk_data_field_data_map_id;
+drop index bnk_st_data_field_unq_prop on bnk_stmnt_data_field;
+alter table bnk_stmnt_data_field 
+add constraint bnk_st_data_field_unq_prop unique (data_map_id, prop_name,user_id),
+add constraint fk_data_field_data_map_id foreign key (data_map_id) references bnk_stmnt_data_map (id ) on delete cascade;
+
+alter table mt_user_role drop foreign key fk_userrole_user_id;
+drop index unq_userrole_role_user on mt_user_role;
+alter table mt_user_role 
+add constraint unq_userrole_role_user unique (user_id, role_id),
+add constraint fk_userrole_user_id foreign key (user_id) references mt_user (id );
+
+drop index unq_imptran_checksum on imported_transaction;
 alter table imported_transaction 
-add constraint fk_imported_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table setting add user_id int(20) NOT NULL;
-update setting set user_id = (select id from mt_user where name = 'Demo');
-alter table setting 
-add constraint fk_setting_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
-
-alter table transaction add user_id int(20) NOT NULL;
-update transaction set user_id = (select id from mt_user where name = 'Demo');
-alter table transaction 
-add constraint fk_transaction_user_id FOREIGN KEY (USER_ID) REFERENCES mt_user (ID );
+add constraint unq_imptran_checksum unique (checksum,user_id);

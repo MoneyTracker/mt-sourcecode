@@ -27,6 +27,10 @@ public abstract class BaseEntity extends Entity implements Serializable {
 
 	protected Long userId;
 	
+	protected String message;
+	
+	protected String messageType;
+	
 	public BaseEntity() {
 	}
 
@@ -53,6 +57,22 @@ public abstract class BaseEntity extends Entity implements Serializable {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	} 
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+	public String getMessageType() {
+		return messageType;
+	}
+	
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
+	}
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this,

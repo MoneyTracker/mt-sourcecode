@@ -106,4 +106,12 @@ public final class Constants {
 	public static final String ACTIVITY_TOTAL_RES = "Total {0} Available";
 
 	public static final long ACTIVITY_CAT_MIN = 5;
+
+	public static final String MSG_DUPLICATE = "Failed: Already Exists";
+	
+	public static final String MSG_POTENTIAL_DUPLICATE_TRANSACTION = "Potential Duplicate";
+
+	public static final String MSG_OK_TO_SAVE = "Ok to Save";
+
+	public static final String MSG_SUCCESSFUL = "Stored Successfully";
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.ValidationException;
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.paging.list.PageableList;
@@ -74,14 +75,6 @@ public class TransactionServiceImpl implements TransactionService {
 	private static final String INCOME_EXPENSE_TOTAL = "Transaction.getIncomeExpenseTotal";
 
 	private static final String SUM_BY_CATEGORIES_REPORT = "Transaction.sumByCategoriesReport";
-
-	public static final String MSG_DUPLICATE_TRANSACTION = "Failed: Already Exists";
-
-	public static final String MSG_POTENTIAL_DUPLICATE_TRANSACTION = "Potential Duplicate";
-
-	public static final String MSG_OK_TO_SAVE = "Ok to Save";
-
-	private static final String MSG_SUCCESSFUL = "Stored Successfully";
 	
 	@Autowired
 	private LoggedInChecker loggedInChecker;
@@ -234,7 +227,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		adjustAccountBalance(current);
-		current.setMessage(TransactionServiceImpl.MSG_SUCCESSFUL);
+		current.setMessage(Constants.MSG_SUCCESSFUL);
 		current.setMessageType(MessageType.TYPE_SUCCESS);
 		AppUtil.setDoNothingAction(current);
 	}
@@ -335,7 +328,6 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	public boolean isDuplicate(Transaction current) throws ServiceException {
-
 		boolean duplicate = false;
 		String checksum = current.getChecksum();
 		try {
@@ -345,7 +337,7 @@ public class TransactionServiceImpl implements TransactionService {
 			int action = current.getAction().getActionIndex();
 			duplicate = Action.CREATE_NEW == action ? count > 0 : count > 1;
 			if (duplicate) {
-				current.setMessage(MSG_DUPLICATE_TRANSACTION);
+				current.setMessage(Constants.MSG_DUPLICATE);
 				current.setMessageType(MessageType.TYPE_ERROR);
 			} 
 		} catch (DataAccessException e) {
@@ -698,7 +690,7 @@ public class TransactionServiceImpl implements TransactionService {
 				to = new Date();
 			}
 			from = DateUtil.getDateWithoutTime(from);
-			to = DateUtil.getDateWithoutTime(to);
+			to = DateUtil.getToDate(to);
 			logger.debug("after from : " + from + " to: " + to);
 			return new Date[] {from, to};
 		}

@@ -5,7 +5,7 @@ angular.module('mt-app')
     function ($rootScope, $scope) {
 
     $scope.dashboardItem = {
-        active: true,
+        active: false,
         url:'dashboard',
         title: 'Dashboard',
         logoClass: 'fa fa-tachometer',

@@ -74,8 +74,11 @@ angular.module('mt-app')
         console.dir($scope.selectedMonths);
         $scope.selectedMonths = [];
     };
-    $scope.init = function () {        
+    $scope.init = function () {   
         console.info("init");
+        $scope.loadCategories();
+        $scope.loadAccounts();
+        
         $scope.searchDto = {
             'page': { 'pageNumber': 1, 'pageSize': 10, 'totalRecords' : 0},
             'reportBy': 'OVERALL',
@@ -112,8 +115,7 @@ angular.module('mt-app')
                 $scope.requestServerPage(page, $defer);
             }
         });
-        $scope.loadCategories();
-        $scope.loadAccounts();
+        
 
         $hotkeys.add({
             combo: 'alt+a',

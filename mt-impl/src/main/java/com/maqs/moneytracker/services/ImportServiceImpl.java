@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.maqs.moneytracker.common.Constants;
 import com.maqs.moneytracker.common.paging.Page;
 import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
@@ -255,10 +256,10 @@ public class ImportServiceImpl implements ImportService {
 			for (Transaction t : transactions) {
 				String checksum = t.getOriginalChecksum();
 				if (duplicateChecksumList.contains(checksum)) {
-					t.setMessage(TransactionServiceImpl.MSG_POTENTIAL_DUPLICATE_TRANSACTION);
+					t.setMessage(Constants.MSG_POTENTIAL_DUPLICATE_TRANSACTION);
 					t.setMessageType(MessageType.TYPE_WARN);
 				} else {
-					t.setMessage(TransactionServiceImpl.MSG_OK_TO_SAVE);
+					t.setMessage(Constants.MSG_OK_TO_SAVE);
 					t.setMessageType(MessageType.TYPE_SUCCESS);
 				}
 			}

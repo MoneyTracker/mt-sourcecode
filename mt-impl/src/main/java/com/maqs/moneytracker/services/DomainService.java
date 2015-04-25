@@ -23,7 +23,10 @@ public interface DomainService {
 
 	public List<Category> storeCategories(List<Category> categories)
 			throws ServiceException;
-
+	
+	public List<Category> storeCategoryTree(List<Category> categories)
+			throws ServiceException;
+	
 	public List<Account> storeAccounts(List<Account> accounts)
 			throws ServiceException;
 	

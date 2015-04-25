@@ -22,6 +22,7 @@ angular.module('mt-app')
             $scope.categoryTree = $scope.transferCategories;
         }
         $scope.searchDto.transactionType = $scope.$type;
+        $scope.catTableParams.page(0);
         $scope.catTableParams.reload();
     };
     $scope.newAccount = {
@@ -351,6 +352,11 @@ angular.module('mt-app')
           var data = ApplicationService.getDeleteData(msg);
           console.dir(data);
           ApplicationService.confirm(data, confirmedCallback, declinedCallback);
+        } else {
+          var index = $scope.categoryTree.indexOf(c);
+          if (index > -1) {
+            $scope.categoryTree.splice(index, 1);
+          }
         }
     };
     $scope.cancelCategory = function(c) {
@@ -374,29 +380,34 @@ angular.module('mt-app')
         $scope.categoryTree.splice(index, 1);
       }
     };
-    $scope.resetCategory=function(c, withCat) {      
-      var parentId = c.parentCategoryId;
+    $scope.resetCategory=function(c, withCat) {
+      /*if (withCat.messageType && (withCat.messageType == 'err' || 
+        withCat.messageType == 'warn')) {
+        withCat.$$edit = true;
+      }*/
+      var parentId = withCat.parentCategoryId;
       var index = -1;
       if (parentId) {
         var selected = $filter('filter')($scope.categoryTree, {id: parentId});
         var parent = selected[0];
         if (parent) {
           index = parent.children.indexOf(c);
-          if (c.id) {
+          if (index > -1) {
             parent.children[index] = withCat;
-          } else {
-            parent.children.splice(index, 1);
-          }
+          } 
         }
       } else {
         index = $scope.categoryTree.indexOf(c);
-        if (c.id) {
+        /*if (withCat.id) {
           $scope.categoryTree[index] = withCat;
         } else {
           $scope.categoryTree.splice(index, 1);
-        }
+        }*/
+        if (index > -1) {
+          $scope.categoryTree[index] = withCat;
+        } 
       }
-      //withCat = undefined;
+      withCat = undefined;
     };
     $scope.showSystemCategories = function() {
       var data = {};
@@ -404,8 +415,22 @@ angular.module('mt-app')
           'SystemCategoryController',data,
           'lg');
       dlg.result.then(function(data){
-          console.info("save");
+          console.info("import");
           console.dir(data);
+          if (data && data.length > 0) {
+            var promise = DomainService.storeCategoryTree(data);
+            promise.then(
+                function (data) {
+                  for (var i = 0; i < data.length; i++) {
+                    var c = data[i];
+                    $scope.categoryTree.push(c);
+                  };
+                },
+                function (reason) {
+                    console.log('Failed: ' + reason);
+                }
+            );
+          }
       },function(){
           console.info("cancel");
       });

@@ -23,8 +23,9 @@ angular.module('mt-app')
     	title: "Income",
     	color: "#60D59C"
     }
-    $scope.reports = [$scope.historyReportConf, $scope.expenseReportConf, $scope.incomeReportConf]
-    $scope.selectedReport = $scope.historyReportConf;
+    $scope.reports = [$scope.expenseReportConf, $scope.incomeReportConf,
+    $scope.historyReportConf]
+    $scope.selectedReport = $scope.reports[0];
     $scope.incExpDrilldownSeries = [];
     $scope.incExpSeries = {
         name: 'Expenses',
@@ -114,7 +115,7 @@ angular.module('mt-app')
       $scope.thisMonth();
     };
     $scope.showReport=function() {
-      //$scope.initChart();
+      $scope.initChart();
       $scope.showBudget();
     };
     $scope.showBudget = function() {

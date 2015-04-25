@@ -30,11 +30,13 @@ import com.maqs.moneytracker.dto.DomainSearchDto;
 import com.maqs.moneytracker.model.Account;
 import com.maqs.moneytracker.model.BaseEntity;
 import com.maqs.moneytracker.model.Category;
+import com.maqs.moneytracker.model.Transaction;
 import com.maqs.moneytracker.model.User;
 import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
 import com.maqs.moneytracker.types.AccountType;
+import com.maqs.moneytracker.types.MessageType;
 import com.maqs.moneytracker.types.TransactionType;
 
 @Service
@@ -98,19 +100,95 @@ public class DomainServiceImpl implements DomainService {
 			throws ServiceException {
 		try {
 			Long userId = loggedInChecker.getCurrentUserId();
+			List<Category> storeList = new ArrayList<Category>();
 			for (Category category : categories) {
 				int actionIndex = category.getAction().getActionIndex();
 				if (Action.CREATE_NEW == actionIndex) {
 					category.setUserId(userId);
 				}
+				if (isDuplicate(category)) {
+					category.setMessage(Constants.MSG_DUPLICATE);
+					category.setMessageType(MessageType.TYPE_ERROR);
+					continue;
+				} else {
+					category.setMessage(Constants.MSG_SUCCESSFUL);
+					category.setMessageType(MessageType.TYPE_SUCCESS);
+					storeList.add(category);
+				}
 			}
-			dao.saveAll(categories);
+			if (CollectionsUtil.isNonEmpty(storeList)) {
+				dao.saveAll(storeList);
+			}
 		} catch (DataAccessException e) {
 			throw new ServiceException(e);
 		}
 		return categories;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+	public List<Category> storeCategoryTree(List<Category> categories)
+			throws ServiceException {
+		if (CollectionsUtil.isNullOrEmpty(categories)) {
+			return null;
+		}
+		try {
+			Long userId = loggedInChecker.getCurrentUserId();
+			List<Category> storeList = new ArrayList<Category>();
+			for (Category category : categories) {
+				int actionIndex = category.getAction().getActionIndex();
+				if (Action.DO_NOTHING == actionIndex) {
+					continue;
+				}
+				if (Action.CREATE_NEW == actionIndex) {
+					category.setUserId(userId);
+				}
+				if (isDuplicate(category)) {
+					category.setMessage(Constants.MSG_DUPLICATE);
+					category.setMessageType(MessageType.TYPE_ERROR);
+					continue;
+				} else {
+					category.setMessage(Constants.MSG_SUCCESSFUL);
+					category.setMessageType(MessageType.TYPE_SUCCESS);
+				}
+				logger.debug("category to be stored: " + category.getName());
+				storeList.add(category);
+			}
+			if (CollectionsUtil.isNonEmpty(storeList)) {
+				dao.saveAll(storeList);
+			}
+			List<Category> storeChildList = new ArrayList<Category>();
+			for (Category c : categories) {
+				List<Category> children = c.getChildren();
+				if (CollectionsUtil.isNonEmpty(children)) {
+					for (Category child : children) {
+						int actionIndex = child.getAction().getActionIndex();
+						if (Action.DO_NOTHING != actionIndex) {
+							child.setParentCategoryId(c.getId());
+							child.setUserId(userId);
+							if (isDuplicate(child)) {
+								child.setMessage(Constants.MSG_DUPLICATE);
+								child.setMessageType(MessageType.TYPE_ERROR);
+								continue;
+							} else {
+								child.setMessage(Constants.MSG_SUCCESSFUL);
+								child.setMessageType(MessageType.TYPE_SUCCESS);
+							}
+							storeChildList.add(child);
+						}
+					}
+				}
+			}
+			if (CollectionsUtil.isNonEmpty(storeChildList)) {
+				dao.saveAll(storeChildList);
+			}
+		} catch (DataAccessException e) {
+			throw new ServiceException(e);
+		}
+		return categories;
+	}
 	/**
 	 * {@inheritDoc}
 	 */
@@ -535,4 +613,22 @@ public class DomainServiceImpl implements DomainService {
 		return count;
 	}
 	
+	public boolean isDuplicate(Category c) throws ServiceException {
+		boolean duplicate = false;
+		try {
+			QuerySpec querySpec = loggedInChecker.getQuerySpec(Category.class);
+			querySpec.addPropertySpec(new PropertySpec(Category.NAME, c.getName()));
+			Long parentId = c.getParentCategoryId();
+			if (parentId != null) {
+				querySpec.addPropertySpec(new PropertySpec(Category.PARENT_ID, parentId));
+			}
+			Long count = dao.count(querySpec);
+			int action = c.getAction().getActionIndex();
+			duplicate = Action.CREATE_NEW == action ? count > 0 : count > 1;
+			logger.debug("isDuplicate: " + c.getName() + "? " + duplicate);
+		} catch (DataAccessException e) {
+			throw new ServiceException(e.getMessage(), e);
+		}
+		return duplicate;
+	}
 }

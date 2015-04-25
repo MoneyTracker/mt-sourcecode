@@ -279,9 +279,14 @@ public final class DateUtil {
 	}
 
 	public static void main(String[] args) {
-		Date[] range = getHistoricalReportRange();
-		logger.debug("after from : " + range[0] + " to: " + range[1]);
-		System.out.println(getDateAsString("04-Nov-2014", DEFAULT_FORMAT));
+		try {
+			Date d = getDate("04-Nov-2014", "dd-MMM-yyyy");
+			System.out.println(d);
+			System.out.println(getToDate(d));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public static String getFormattedDate(Date date) {
@@ -298,4 +303,14 @@ public final class DateUtil {
 		Date[] range = { start.toDateMidnight().toDate(), now.toDate() };
 		return range;
 	}
+
+	public static Date getToDate(Date toDate) {
+		if (toDate == null) {
+			return null;
+		}
+		DateTime to = new DateTime(toDate.getTime()).plusDays(1);
+		DateTime toDateWithEndTime = to.withTimeAtStartOfDay().minusSeconds(1);
+		return toDateWithEndTime.toDate();
+	}
+	
 }
