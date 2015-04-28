@@ -1042,10 +1042,6 @@ border-radius: 50%;
 .medialogo {
 	font-size: 7.5em;
 }
-.bullet {
-	font-size: 3.5em;
-	vertical-align: middle;
-}
 .check {
   font-size: 1.5em;
   vertical-align: middle;
@@ -1223,4 +1219,27 @@ button {cursor: pointer;}
   font-size: 50px;
   padding: 32px;
   color: #FFF;
+}
+.bullet {
+  font-size: 30px;
+  padding: 5px;
+  color: #FFF;
+}
+.trackMoney0Bg{
+   background-color: #AA1F41;
+}
+.trackMoney1Bg {
+    background-color: #F74E66;
+}
+.budget0Bg{
+  background-color: #C72328;
+}
+.budget1Bg {
+  background-color: #e97f70;
+}
+.import0Bg{
+  background-color: #22A565;
+}
+.import1Bg {
+  background-color: #1E7A4D;
 }
