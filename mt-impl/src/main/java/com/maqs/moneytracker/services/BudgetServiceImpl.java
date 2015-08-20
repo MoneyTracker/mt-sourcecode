@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.maqs.moneytracker.common.paging.spec.Operation;
 import com.maqs.moneytracker.common.paging.spec.PropertySpec;
 import com.maqs.moneytracker.common.paging.spec.QuerySpec;
+import com.maqs.moneytracker.common.service.exception.BusinessException;
 import com.maqs.moneytracker.common.service.exception.ServiceException;
 import com.maqs.moneytracker.common.transferobjects.Action;
 import com.maqs.moneytracker.common.transferobjects.Entity;
@@ -30,7 +31,6 @@ import com.maqs.moneytracker.dto.TransactionSearchDto;
 import com.maqs.moneytracker.model.Budget;
 import com.maqs.moneytracker.model.BudgetItem;
 import com.maqs.moneytracker.model.Category;
-import com.maqs.moneytracker.model.Transaction;
 import com.maqs.moneytracker.security.LoggedInChecker;
 import com.maqs.moneytracker.server.core.dao.IDao;
 import com.maqs.moneytracker.server.core.exception.DataAccessException;
@@ -200,7 +200,7 @@ public class BudgetServiceImpl implements BudgetService {
 			transactionSearchDto.setToDate(searchDto.getToDate());
 			List<TransactionDto> tranListByCategories = transactionService.sumByExpenseCategories(transactionSearchDto);
 			if (! CollectionsUtil.isNonEmpty(tranListByCategories)) {
-				throw new ServiceException("No transactions found during this period");
+				throw new BusinessException("no_transactions_found", "No transactions found during this period");
 			}
 			Map<Long, TransactionDto> map = transactionService.getTransactionsByCategoryMap(tranListByCategories);
 			Set<Long> ids = map.keySet();

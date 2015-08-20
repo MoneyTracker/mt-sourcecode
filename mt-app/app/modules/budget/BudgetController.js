@@ -2,8 +2,8 @@
 
 angular.module('mt-app')
     .controller('BudgetController', ['$rootScope', '$scope', '$filter', '$state', '$window',
-    	'ApplicationService', 'DomainService', 'TransactionService', 'BudgetService',
-    	function ($rootScope, $scope, $filter, $state, $window, ApplicationService, DomainService, TransactionService, BudgetService) {
+    	'ApplicationService', 'DomainService', 'TransactionService', 'BudgetService','ACTION_INDEX',
+    	function ($rootScope, $scope, $filter, $state, $window, ApplicationService, DomainService, TransactionService, BudgetService, ACTION_INDEX) {
     console.info("BudgetController")
     $scope.treeData = [];
     $scope.transactionSearchDto = { };
@@ -16,10 +16,10 @@ angular.module('mt-app')
     $scope.init = function () {
       console.info("BudgetController:init");
       $scope.searchDto = BudgetService.searchDto;
-        BudgetService.init();
-    	//DomainService.init();
+      BudgetService.init();
       $scope.loadBudgets();
       $scope.loadCategoryTree();
+      DomainService.loadPeriods($scope);
     };
     $scope.budgetSearchChanged = function(searchDto) { // searchDto
       $scope.searchDto.fromDate = searchDto.fromDate;
@@ -50,7 +50,16 @@ angular.module('mt-app')
         var promise = DomainService.listCategoryTree(DomainService.searchDto);
         promise.then(
             function (data) {
-                $scope.treeData = data;
+                if (data) {
+                  $scope.categoryTree = data.contentList; 
+                  $scope.categories = [];
+                  for (var i = 0; i < $scope.categoryTree.length; i++) {
+                    var children = $scope.categoryTree[i].children;
+                    if (children) {
+                      $scope.categories.concat(children);
+                    }
+                  };
+                }
             },
             function (reason) {
                 console.log('Failed: ' + reason);
@@ -111,6 +120,13 @@ angular.module('mt-app')
         item.$$edit = false;
         item = $scope.original;
     };
+    $scope.budgetChanged = function(budgetItem) {
+      if (budgetItem.id) {
+        budgetItem.action.actionIndex = ACTION_INDEX.UPDATE;
+      }  
+      console.info("budgetChanged: " + budgetItem.id);
+      console.dir(budgetItem);
+    };
     $scope.categoryChanged = function(budgetItem) {
         console.info("cat changed");
         console.info(budgetItem.categoryId);
@@ -118,6 +134,7 @@ angular.module('mt-app')
           var selected = $filter('filter')($scope.categories, {id: budgetItem.categoryId});
           budgetItem.category = selected[0];
         }
+        $scope.budgetChanged(budgetItem);
     };
     $scope.periodChanged = function(budgetItem) {
         console.info("period changed");
@@ -126,7 +143,7 @@ angular.module('mt-app')
           var selected = $filter('filter')($rootScope.periods, {code: budgetItem.periodCode});
           budgetItem.period = selected[0];
         }
-        console.dir(budgetItem);
+        $scope.budgetChanged(budgetItem);
     };
     $scope.saveBudgetItem = function(item) {
         console.info("saveBudgetItem");
@@ -254,5 +271,30 @@ angular.module('mt-app')
       console.info("from: " + fromDate);
       console.info("to: " + toDate);
       $scope.searchDto.toDate = toDate;      
+    };
+    $scope.cancelBudgetItem = function(b) {
+        console.dir(b);
+        b.$$edit = false;
+        $scope.resetBudgetItem(b, $scope.original);
+    };    
+    $scope.resetBudgetItem=function(b, withBudItem) {
+      var parentId = withBudItem.category.parentCategoryId;
+      var index = -1;
+      if (parentId) {
+        var selected = $filter('filter')($scope.budgetItems, {categoryId: parentId});
+        var parent = selected[0];
+        if (parent) {
+          index = parent.children.indexOf(b);
+          if (index > -1) {
+            parent.children[index] = withBudItem;
+          } 
+        }
+      } else {
+        index = $scope.budgetItems.indexOf(b);
+        if (index > -1) {
+          $scope.budgetItems[index] = withBudItem;
+        } 
+      }
+      withBudItem = undefined;
     };
 }]);

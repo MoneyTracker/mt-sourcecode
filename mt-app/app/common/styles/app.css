@@ -1055,10 +1055,10 @@ border-radius: 50%;
   vertical-align: middle;
 }
 .disabled {
-  color: #CCC;
+  color: #CCC !important;
 }
 .enabled {
-  color: #60D59C;
+  color: #60D59C !important;
 }
 .bordered {
   border: 1px solid #CCC;
@@ -1108,7 +1108,8 @@ background-image: none;
 }
 
 ::-webkit-scrollbar {
-	width: 6px;
+	width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-button {
 	height: 5px;
@@ -1131,8 +1132,6 @@ background-image: none;
   background-color:#696975;
   border:1px solid #696975;
 }
-
-
 .scrollArea {
   overflow: auto;
 }

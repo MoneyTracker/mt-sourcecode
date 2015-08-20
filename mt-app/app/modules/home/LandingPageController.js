@@ -37,7 +37,7 @@ angular.module('mt-app')
     },
     {
       image: 'common/images/Carousel/Category.jpg',
-      textColor: '#252530',
+      textColor: '#FFF',
       caption: 'Group your own Category Hierarchy'
     },
     {
@@ -50,7 +50,7 @@ angular.module('mt-app')
   $scope.featuresInterval = 10000;
   var bulletMoney = 'common/images/32/Money.png';
 
-  $scope.trackMyMoneyHeading = 'Track your Money';  
+  $scope.trackMyMoneyHeading = 'Track Your Money';  
   $scope.trackMyMoneyFeatures = [
     { 
       bullet: bulletMoney,
@@ -118,12 +118,16 @@ angular.module('mt-app')
     { 
       bullet: bulletExcel,
       textColor: '#FFF',
-      description: 'Manage as many as budgets you want.'
+      description: 'Create and Manage as many as budgets you want.'
     },
     {
       bullet: bulletExcel,
       textColor: '#FFF',      
-      description: 'Create your Statements with unlimited number of Data Maps so that when you upload the Spreadsheet the system auto populates the Category & Account.',
+      description: 'Compare your current budget and the spendings with previous month\'s.',
     }
   ];
+  $scope.onTrackMoneySlideChanged = function (slide, direction) {
+    console.log('onSlideChanged:', direction, slide);
+    $scope.trackMoneyCurrentSlide = slide;
+  };
 }]);

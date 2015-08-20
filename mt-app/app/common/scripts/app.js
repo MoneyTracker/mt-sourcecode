@@ -91,6 +91,24 @@ app.directive('focus', function () {
      element.focus();
   }
 });
+app.directive('onCarouselChange', function ($parse) {
+  return {
+    require: 'carousel',
+    link: function (scope, element, attrs, carouselCtrl) {
+      var fn = $parse(attrs.onCarouselChange);
+      var origSelect = carouselCtrl.select;
+      carouselCtrl.select = function (nextSlide, direction) {
+        if (nextSlide !== this.currentSlide) {
+          fn(scope, {
+            nextSlide: nextSlide,
+            direction: direction,
+          });
+        }
+        return origSelect.apply(this, arguments);
+      };
+    }
+  };
+});
 // app.config(function(cfpLoadingBarProvider) {
 //     cfpLoadingBarProvider.includeSpinner = true;
 // });
@@ -234,7 +252,8 @@ app.constant('ACTION_INDEX', {
 })
 app.run(function ($rootScope, configuration) {
     $rootScope.hosturl = configuration.hosturl;
-    $rootScope.busyMessage = "Loading ..."
+    $rootScope.busyMessage = "Loading ...";
+    $rootScope.defaultNumberStep = 50;
     $rootScope.defaultCurrency = "Rs. ";
     $rootScope.defaultCurrencyClass = "fa fa-inr";
     $rootScope.dateFormat = "yyyy-MMM-dd";

@@ -110,7 +110,7 @@
     <td style="text-align: right; width: 13%" data-title="'Amount'" sortable="'amount'">
       <span ng-if="!t.$$edit" ng-class="{expense:t.category.transactionType.code== 'E', income:t.category.transactionType.code == 'I', transfer: t.category.transactionType.code == 'T'}">{{t.amount | number : 2 }}</span>
       <div ng-if="t.$$edit">
-        <input id="t{{t.id}}_amount" name="t{{t.id}}_amount" class="form-control" type="number" ng-model="t.amount" ng-change="tranChanged(t)" step="50" required />
+        <input id="t{{t.id}}_amount" name="t{{t.id}}_amount" class="form-control" type="number" ng-model="t.amount" ng-change="tranChanged(t)" step="{{defaultNumberStep}}" required />
       </div>
     </td>
     <td style="text-align: left; width: 32%" class="long-text" data-title="'Description'" sortable="'description'">

@@ -18,24 +18,24 @@
 
      <div class="col-xs-12 col-sm-12 col-lg-9">
       <div>
-       <carousel interval="featuresInterval">
+       <carousel id="track" interval="featuresInterval" on-carousel-change="onTrackMoneySlideChanged(nextSlide, direction)">
         <slide active="true">
           <img class="thumbnail" ng-src="common/images/howto/searchtransactions.gif">
-          <div class="carousel-caption"> <!--transbox-->
+          <!-- <div class="carousel-caption"> 
             <h4>Search Transactions</h4>
-          </div>
+          </div> -->
         </slide>  
         <slide>
           <img class="thumbnail" ng-src="common/images/howto/createnewtransaction.gif">
-          <div class="carousel-caption"> 
+          <!-- <div class="carousel-caption"> 
             <h4>Create New Transaction</h4>
-          </div>
+          </div> -->
         </slide> 
         <slide>
           <img class="thumbnail" ng-src="common/images/howto/transactions_quicker.gif">
-          <div class="carousel-caption"> 
+          <!-- <div class="carousel-caption"> 
             <h4>Faster Creation & Deletion</h4>
-          </div>
+          </div> -->
         </slide>    
       </carousel>
      </div>
